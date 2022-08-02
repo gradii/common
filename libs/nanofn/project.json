@@ -1,0 +1,38 @@
+{
+  "projectType": "library",
+  "sourceRoot": "libs/nanofn/src",
+  "prefix": "common",
+  "targets": {
+    "build": {
+      "executor": "@nrwl/angular:package",
+      "outputs": ["dist/libs/nanofn"],
+      "options": {
+        "project": "libs/nanofn/ng-package.json"
+      },
+      "configurations": {
+        "production": {
+          "tsConfig": "libs/nanofn/tsconfig.lib.prod.json"
+        },
+        "development": {
+          "tsConfig": "libs/nanofn/tsconfig.lib.json"
+        }
+      },
+      "defaultConfiguration": "production"
+    },
+    "test": {
+      "executor": "@nrwl/jest:jest",
+      "outputs": ["coverage/libs/nanofn"],
+      "options": {
+        "jestConfig": "libs/nanofn/jest.config.ts",
+        "passWithNoTests": true
+      }
+    },
+    "lint": {
+      "executor": "@nrwl/linter:eslint",
+      "options": {
+        "lintFilePatterns": ["libs/nanofn/**/*.ts", "libs/nanofn/**/*.html"]
+      }
+    }
+  },
+  "tags": []
+}
