@@ -1,9 +1,14 @@
 {
   "name": "@gradii/vector-math",
   "version": "0.0.1",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gradii/common.git"
+  },
+  "keywords": [
+    "vector-math"
+  ],
   "peerDependencies": {
-    "@angular/common": "^14.1.0",
-    "@angular/core": "^14.1.0"
   },
   "dependencies": {
     "tslib": "^2.3.0"
