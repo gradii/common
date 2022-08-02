@@ -1,0 +1,18 @@
+{
+  "name": "@gradii/annotation",
+  "version": "0.0.0-PLACEHOLDER",
+  "description": "Annotation Packages",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gradii/triangle.git"
+  },
+  "keywords": [
+    "annotation"
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "tslib": "0.0.0-TSLIB"
+  },
+
+  "sideEffects": false
+}

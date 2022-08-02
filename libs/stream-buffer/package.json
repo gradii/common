@@ -1,0 +1,17 @@
+{
+  "name": "@gradii/stream-buffer",
+  "version": "0.0.0-PLACEHOLDER",
+  "description": "gradii stream buffer",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gradii/triangle.git"
+  },
+  "keywords": [
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "tslib": "0.0.0-TSLIB"
+  },
+  "sideEffects": false
+}
+

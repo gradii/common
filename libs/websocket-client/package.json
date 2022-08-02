@@ -1,0 +1,17 @@
+{
+  "name": "@gradii/websocket-client",
+  "version": "0.0.0-beta.2",
+  "description": "gradii websocket client",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/gradii/triangle.git"
+  },
+  "keywords": [
+  ],
+  "license": "MIT",
+  "peerDependencies": {
+    "tslib": "0.0.0-TSLIB"
+  },
+  "sideEffects": false
+}
+
