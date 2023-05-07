@@ -5,7 +5,6 @@
  */
 
 import { words } from './words';
-import { toString } from '../cast/to-string';
 
 
 /**
@@ -27,7 +26,7 @@ import { toString } from '../cast/to-string';
  * // => 'FOO BAR'
  */
 export function upperCase(str: string) {
-  return words(toString(str).replace(/['\u2019]/g, '')).reduce((result, word, index) => (
+  return words(str).reduce((result, word, index) => (
     result + (index ? ' ' : '') + word.toUpperCase()
   ), '');
 }

@@ -1,13 +1,27 @@
 {
+  "name": "nanofn",
   "projectType": "library",
   "sourceRoot": "libs/nanofn/src",
   "prefix": "common",
   "targets": {
+    "version": {
+      "executor": "@jscutlery/semver:version",
+      "options": {
+        "baseBranch": "master",
+        "releaseAs": "patch",
+        "postTargets": [
+          "nanofn:build"
+        ]
+      }
+    },
     "build": {
       "executor": "@nrwl/angular:package",
-      "outputs": ["dist/libs/nanofn"],
+      "outputs": [
+        "{workspaceRoot}/dist/libs/nanofn"
+      ],
       "options": {
-        "project": "libs/nanofn/ng-package.json"
+        "project": "libs/nanofn/ng-package.json",
+        "updateBuildableProjectDepsInPackageJson": false
       },
       "configurations": {
         "production": {
@@ -21,7 +35,9 @@
     },
     "test": {
       "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/nanofn"],
+      "outputs": [
+        "{workspaceRoot}/coverage/libs/nanofn"
+      ],
       "options": {
         "jestConfig": "libs/nanofn/jest.config.ts",
         "passWithNoTests": true
@@ -30,7 +46,10 @@
     "lint": {
       "executor": "@nrwl/linter:eslint",
       "options": {
-        "lintFilePatterns": ["libs/nanofn/**/*.ts", "libs/nanofn/**/*.html"]
+        "lintFilePatterns": [
+          "libs/nanofn/src/**/*.ts",
+          "libs/nanofn/src/**/*.html"
+        ]
       }
     }
   },

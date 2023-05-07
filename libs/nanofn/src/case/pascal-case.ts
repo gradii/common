@@ -8,7 +8,7 @@ import { upperFirst } from './upper-first';
 import { words } from './words';
 
 export function pascalCase(str: string): string {
-  return words(str.replace(/['\u2019]/g, ''))
+  return words(str)
     .reduce((result, word, index) => {
       word = word.toLowerCase();
       return result + upperFirst(word);

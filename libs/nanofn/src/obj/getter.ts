@@ -4,34 +4,133 @@
  * Use of this source code is governed by an MIT-style license
  */
 
-import { _baseGet } from '../_internal/base-get';
 
-/**
- * Gets the value at `path` of `object`. If the resolved value is
- * `undefined`, the `defaultValue` is returned in its place.
- *
- * @category Object
- * @param {Object} object The object to query.
- * @param {Array|string} path The path of the property to get.
- * @param {*} [defaultValue] The value returned for `undefined` resolved values.
- * @returns {*} Returns the resolved value.
- * @see has, hasIn, set, unset
- * @example
- *
- * const object = { 'a': [{ 'b': { 'c': 3 } }] }
- *
- * get(object, 'a[0].b.c')
- * // => 3
- *
- * get(object, ['a', '0', 'b', 'c'])
- * // => 3
- *
- * get(object, 'a.b.c', 'default')
- * // => 'default'
- */
-export function getter(object: Record<string, any>, path: string, defaultValue?: any): any {
-  const result = object == null ? undefined : _baseGet(object, path);
-  return result === undefined ? defaultValue : result;
+export function getter<TObject extends object, TKey extends keyof TObject>(
+  object: TObject,
+  path: TKey | [TKey]
+): TObject[TKey]
+export function getter<TObject extends object, TKey extends keyof TObject>(
+  object: TObject | null | undefined,
+  path: TKey | [TKey]
+): TObject[TKey] | undefined
+export function getter<
+  TObject extends object,
+  TKey extends keyof TObject,
+  TDefault
+  >(
+  object: TObject | null | undefined,
+  path: TKey | [TKey],
+  defaultValue: TDefault
+): Exclude<TObject[TKey], undefined> | TDefault
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1]
+  >(object: TObject, path: [TKey1, TKey2]): TObject[TKey1][TKey2]
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1]
+  >(
+  object: TObject | null | undefined,
+  path: [TKey1, TKey2]
+): TObject[TKey1][TKey2] | undefined
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1],
+  TDefault
+  >(
+  object: TObject | null | undefined,
+  path: [TKey1, TKey2],
+  defaultValue: TDefault
+): Exclude<TObject[TKey1][TKey2], undefined> | TDefault
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1],
+  TKey3 extends keyof TObject[TKey1][TKey2]
+  >(object: TObject, path: [TKey1, TKey2, TKey3]): TObject[TKey1][TKey2][TKey3]
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1],
+  TKey3 extends keyof TObject[TKey1][TKey2]
+  >(
+  object: TObject | null | undefined,
+  path: [TKey1, TKey2, TKey3]
+): TObject[TKey1][TKey2][TKey3] | undefined
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1],
+  TKey3 extends keyof TObject[TKey1][TKey2],
+  TDefault
+  >(
+  object: TObject | null | undefined,
+  path: [TKey1, TKey2, TKey3],
+  defaultValue: TDefault
+): Exclude<TObject[TKey1][TKey2][TKey3], undefined> | TDefault
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1],
+  TKey3 extends keyof TObject[TKey1][TKey2],
+  TKey4 extends keyof TObject[TKey1][TKey2][TKey3]
+  >(
+  object: TObject,
+  path: [TKey1, TKey2, TKey3, TKey4]
+): TObject[TKey1][TKey2][TKey3][TKey4]
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1],
+  TKey3 extends keyof TObject[TKey1][TKey2],
+  TKey4 extends keyof TObject[TKey1][TKey2][TKey3]
+  >(
+  object: TObject | null | undefined,
+  path: [TKey1, TKey2, TKey3, TKey4]
+): TObject[TKey1][TKey2][TKey3][TKey4] | undefined
+export function getter<
+  TObject extends object,
+  TKey1 extends keyof TObject,
+  TKey2 extends keyof TObject[TKey1],
+  TKey3 extends keyof TObject[TKey1][TKey2],
+  TKey4 extends keyof TObject[TKey1][TKey2][TKey3],
+  TDefault
+  >(
+  object: TObject | null | undefined,
+  path: [TKey1, TKey2, TKey3, TKey4],
+  defaultValue: TDefault
+): Exclude<TObject[TKey1][TKey2][TKey3][TKey4], undefined> | TDefault
+export function getter(
+  object: null | undefined,
+  path: string | number | string[] | number[]
+): undefined
+export function getter(
+  object: object,
+  path: string | string[] | number[],
+  defaultValue?: any
+): any
+
+export function getter(
+  obj: Record<string, any> | null | undefined,
+  path: string | number | string[] | number[],
+  defaultValue?: any
+) {
+  const paths = Array.isArray(path)
+    ? path
+    : String(path)
+      .replace(/\[(\w+)\]/g, '.$1')
+      .replace(/\["(\w+)"\]/g, '.$1')
+      .replace(/\['(\w+)'\]/g, '.$1')
+      .split('.')
+  let result = obj
+  for (const p of paths) {
+    result = result?.[p]
+    if (result === undefined) {
+      return defaultValue
+    }
+  }
+  return result
 }
-
-

@@ -4,8 +4,6 @@
  * Use of this source code is governed by an MIT-style license
  */
 
-import { toFinite } from './to-finite';
-
 /**
  * Converts `value` to an integer.
  *
@@ -31,10 +29,12 @@ import { toFinite } from './to-finite';
  * // => 3
  */
 export function toInteger(value: any): number {
-  const result    = toFinite(value);
-  const remainder = result % 1;
+  if(isNaN(value)) {
+    return 0;
+  }
+  const remainder = value % 1;
 
-  return remainder ? result - remainder : result;
+  return remainder ? value - remainder : value;
 }
 
 

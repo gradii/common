@@ -1,41 +1,25 @@
-/**
- * @license
- *
- * Use of this source code is governed by an MIT-style license
- */
-
-import { baseAssignValue } from './_internal/base-assign-value';
-import { reduce } from './reduce';
-
-/** Used to check objects for own properties. */
-const hasOwnProperty = Object.prototype.hasOwnProperty;
+import { getter } from '../obj/getter';
 
 /**
- * Creates an object composed of keys generated from the results of running
- * each element of `collection` thru `iteratee`. The order of grouped values
- * is determined by the order they occur in `collection`. The corresponding
- * value of each key is an array of elements responsible for generating the
- * key. The iteratee is invoked with one argument: (value).
+ * Splits a list into sublists stored in an object, based on the result of
+ * calling a String-returning function
+ * on each element, and grouping the results according to values returned.
  *
- * @category Collection
- * @param {Array|Object} collection The collection to iterate over.
- * @param {Function} iteratee The iteratee to transform keys.
- * @returns {Object} Returns the composed aggregate object.
- * @example
- *
- * groupBy([6.1, 4.2, 6.3], Math.floor)
- * // => { '4': [4.2], '6': [6.1, 6.3] }
+ * @param list
+ * @param fn
  */
-export function groupBy(collection, iteratee) {
-  return reduce(collection, (result, value, key) => {
-    key = iteratee(value);
-    if (hasOwnProperty.call(result, key)) {
-      result[key].push(value);
-    } else {
-      baseAssignValue(result, key, [value]);
-    }
-    return result;
-  }, {});
+export function groupBy<T>(
+  list: T[],
+  fn: ((value: T) => string | number) | string
+) {
+  let _getter = fn;
+  if (typeof fn === 'string') {
+    _getter = (it: any) => getter(it, fn as string);
+  }
+  return list.reduce((acc: Record<string | number, T[]>, obj: T) => {
+    const property = (_getter as (value: T) => string | number)(obj);
+    acc[property]  = acc[property] || [];
+    acc[property].push(obj);
+    return acc;
+  }, {} as Record<string | number, T[]>);
 }
-
-

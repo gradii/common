@@ -30,7 +30,7 @@ import { words } from './words';
  * // => 'foo_2_bar'
  */
 export function snakeCase(str: string): string {
-  return words(str.replace(/['\u2019]/g, ''))
+  return words(str)
     .reduce((result, word, index) => (
       result + (index ? '_' : '') + word.toLowerCase()
     ), '');

@@ -5,7 +5,6 @@
  */
 
 import { words } from './words';
-import { toString } from '../cast/to-string';
 
 const reQuotes = /['\u2019]/g;
 
@@ -18,6 +17,9 @@ const reQuotes = /['\u2019]/g;
  * @returns {string} Returns the lower cased string.
  * @see camelCase, kebabCase, snakeCase, startCase, upperCase, upperFirst
  * @example
+ *
+ * lowerCase('\0\0Foo\\00Bar\0\0')
+ * // => 'foo bar'
  *
  * lowerCase('--Foo-Bar--')
  * // => 'foo bar'

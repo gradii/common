@@ -4,7 +4,6 @@
  * Use of this source code is governed by an MIT-style license
  */
 
-import { toString } from '../cast/to-string';
 import { words } from './words';
 
 /**
@@ -27,7 +26,7 @@ import { words } from './words';
  * // => 'foo-bar'
  */
 export function kebabCase(str: string) {
-  return words(toString(str).replace(/['\u2019]/g, ''))
+  return words(str)
     .reduce((result, word, index) => (
       result + (index ? '-' : '') + word.toLowerCase()
     ), '');

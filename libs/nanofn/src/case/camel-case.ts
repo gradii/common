@@ -26,7 +26,7 @@ import { words } from './words';
  * // => 'fooBar'
  */
 export function camelCase(str: string) {
-  return words(str.replace(/['\u2019]/g, ''))
+  return words(str)
     .reduce((result, word, index) => {
       word = word.toLowerCase();
       return result + (index ? upperFirst(word) : word);

@@ -4,7 +4,19 @@
  * Use of this source code is governed by an MIT-style license
  */
 
-import { _baseInRange } from '../_internal/base-in-range';
+/**
+ * The base implementation of `inRange` which doesn't coerce arguments.
+ *
+ * @private
+ * @param {number} num The number to check.
+ * @param {number} start The start of the range.
+ * @param {number} end The end of the range.
+ * @returns {boolean} Returns `true` if `number` is in the range, else `false`.
+ */
+export function _baseInRange(num: number, start: number, end: number): boolean {
+  return num >= Math.min(start, end) && num < Math.max(start, end);
+}
+
 
 /**
  * Checks if `number` is between `start` and up to, but not including, `end`. If

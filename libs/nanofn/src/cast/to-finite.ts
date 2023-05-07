@@ -4,7 +4,6 @@
  * Use of this source code is governed by an MIT-style license
  */
 
-import { toNumber } from './to-number';
 
 /** Used as references for various `Number` constants. */
 const INFINITY    = 1 / 0;
@@ -34,7 +33,7 @@ export function toFinite(value: any): number {
   if (!value) {
     return value === 0 ? value : 0;
   }
-  value = toNumber(value);
+  value = +(value);
   if (value === INFINITY || value === -INFINITY) {
     const sign = (value < 0 ? -1 : 1);
     return sign * MAX_INTEGER;
