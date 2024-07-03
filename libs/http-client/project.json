@@ -1,41 +1,33 @@
 {
-  "projectType": "library",
+  "name": "http-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/http-client/src",
-  "prefix": "applications",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/angular:package",
-      "outputs": ["dist/libs/http-client"],
-      "options": {
-        "project": "libs/http-client/ng-package.json"
-      },
-      "configurations": {
-        "production": {
-          "tsConfig": "libs/http-client/tsconfig.lib.prod.json"
-        },
-        "development": {
-          "tsConfig": "libs/http-client/tsconfig.lib.json"
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/http-client"],
-      "options": {
-        "jestConfig": "libs/http-client/jest.config.ts",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/http-client/**/*.ts",
-          "libs/http-client/**/*.html"
-        ]
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/http-client",
+        "tsConfig": "libs/http-client/tsconfig.lib.json",
+        "packageJson": "libs/http-client/package.json",
+        "main": "libs/http-client/src/index.ts",
+        "assets": ["libs/http-client/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
 }

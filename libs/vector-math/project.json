@@ -1,41 +1,33 @@
 {
-  "projectType": "library",
+  "name": "vector-math",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
   "sourceRoot": "libs/vector-math/src",
-  "prefix": "applications",
-  "targets": {
-    "build": {
-      "executor": "@nrwl/angular:package",
-      "outputs": ["dist/libs/vector-math"],
-      "options": {
-        "project": "libs/vector-math/ng-package.json"
-      },
-      "configurations": {
-        "production": {
-          "tsConfig": "libs/vector-math/tsconfig.lib.prod.json"
-        },
-        "development": {
-          "tsConfig": "libs/vector-math/tsconfig.lib.json"
-        }
-      },
-      "defaultConfiguration": "production"
-    },
-    "test": {
-      "executor": "@nrwl/jest:jest",
-      "outputs": ["coverage/libs/vector-math"],
-      "options": {
-        "jestConfig": "libs/vector-math/jest.config.ts",
-        "passWithNoTests": true
-      }
-    },
-    "lint": {
-      "executor": "@nrwl/linter:eslint",
-      "options": {
-        "lintFilePatterns": [
-          "libs/vector-math/src/**/*.ts",
-          "libs/vector-math/src/**/*.html"
-        ]
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
       }
     }
   },
-  "tags": []
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/vector-math",
+        "tsConfig": "libs/vector-math/tsconfig.lib.json",
+        "packageJson": "libs/vector-math/package.json",
+        "main": "libs/vector-math/src/index.ts",
+        "assets": ["libs/vector-math/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
 }

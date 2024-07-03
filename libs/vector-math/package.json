@@ -1,16 +1,4 @@
 {
   "name": "@gradii/vector-math",
-  "version": "0.0.1",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gradii/common.git"
-  },
-  "keywords": [
-    "vector-math"
-  ],
-  "peerDependencies": {
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
-  }
+  "version": "0.0.1"
 }

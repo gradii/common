@@ -1,24 +1,11 @@
 /* eslint-disable */
-/* eslint-disable */
 export default {
-  displayName: "annotation",
-  preset: "../../jest.preset.js",
-  setupFilesAfterEnv: ["<rootDir>/src/test-setup.ts"],
-  globals: {
-    "ts-jest": {
-      tsconfig: "<rootDir>/tsconfig.spec.json",
-      stringifyContentPathRegex: "\\.(html|svg)$",
-    },
-  },
-  coverageDirectory: "../../coverage/libs/annotation",
+  displayName: 'annotation',
+  preset: '../../jest.preset.js',
+  testEnvironment: 'node',
   transform: {
-    "^.+.(ts|mjs|js|html)$": "jest-preset-angular",
+    '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
-  transformIgnorePatterns: ["node_modules/(?!.*.mjs$)"],
-  transformIgnorePatterns: ["node_modules/(?!.*.mjs$)"],
-  snapshotSerializers: [
-    "jest-preset-angular/build/serializers/no-ng-attributes",
-    "jest-preset-angular/build/serializers/ng-snapshot",
-    "jest-preset-angular/build/serializers/html-comment",
-  ],
+  moduleFileExtensions: ['ts', 'js', 'html'],
+  coverageDirectory: '../../coverage/libs/annotation',
 };

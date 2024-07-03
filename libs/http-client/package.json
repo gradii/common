@@ -1,14 +1,4 @@
 {
   "name": "@gradii/http-client",
-  "version": "0.0.2",
-  "description": "Http Client Package",
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/gradii/triangle.git"
-  },
-  "peerDependencies": {
-  },
-  "dependencies": {
-    "tslib": "^2.3.0"
-  }
+  "version": "0.0.1"
 }
