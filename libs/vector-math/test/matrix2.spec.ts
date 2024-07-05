@@ -1,17 +1,17 @@
-import { Matrix2 } from '../src/matrix2';
-import { Vector2 } from '../src/vector2';
 /**
  * @license
  *
  * Use of this source code is governed by an MIT-style license
  */
 
+import { Matrix2 } from '../src/lib/matrix2';
+import { Vector2 } from '../src/lib/vector2';
 import { parseMatrix, parseVector, relativeTest } from './test-utils';
 
 describe('matrix2', () => {
   it('adjoint', () => {
-    let input = [];
-    let expectedOutput = [];
+    const input = [];
+    const expectedOutput = [];
 
     input
       .push(parseMatrix(`0.830828627896291   0.549723608291140
@@ -32,15 +32,15 @@ describe('matrix2', () => {
     expect(input.length === expectedOutput.length).toBe(true);
 
     for (let i = 0; i < input.length; i++) {
-      let output = input[i].clone();
+      const output = input[i].clone();
       (output as Matrix2).scaleAdjoint(1);
       relativeTest(output, expectedOutput[i]);
     }
   });
 
   it('determinant', () => {
-    let input = [];
-    let expectedOutput = [];
+    const input = [];
+    const expectedOutput = [];
 
     input.push(parseMatrix(`0.830828627896291   0.549723608291140
                                   0.585264091152724   0.917193663829810`));
@@ -115,8 +115,8 @@ describe('matrix2', () => {
                                          3  -4`) as Matrix2;
     const expected = parseMatrix(`1  2
                                         3  4`) as Matrix2;
-    let out = Matrix2.zero();
-    let result = Matrix2.absolute(m, out);
+    const out = Matrix2.zero();
+    const result = Matrix2.absolute(m, out);
 
     expect(result instanceof Matrix2).toBe(true);
 
@@ -126,8 +126,8 @@ describe('matrix2', () => {
   });
 
   it('add', () => {
-    let input = [];
-    let expectedOutput = [];
+    const input = [];
+    const expectedOutput = [];
 
     const m = parseMatrix(`1   1
                                  1   1`);
@@ -148,8 +148,8 @@ describe('matrix2', () => {
   });
 
   it('sub', () => {
-    let input = [];
-    let expectedOutput = [];
+    const input = [];
+    const expectedOutput = [];
 
     const m = parseMatrix(`1   1
                                  1   1`);
@@ -170,8 +170,8 @@ describe('matrix2', () => {
   });
 
   it('multiply', () => {
-    let input = [];
-    let expectedOutput = [];
+    const input = [];
+    const expectedOutput = [];
 
     const m = parseMatrix(`7   8
                                  9   10`);
@@ -192,8 +192,8 @@ describe('matrix2', () => {
   });
 
   it('transform', () => {
-    let input = [];
-    let expectedOutput = [];
+    const input = [];
+    const expectedOutput = [];
 
     const v = parseVector(`7   8`);
 
@@ -213,8 +213,8 @@ describe('matrix2', () => {
   });
 
   it('rotate', () => {
-    let input = [];
-    let expectedOutput = [];
+    const input = [];
+    const expectedOutput = [];
 
     const r = Math.PI / 1.2;
 

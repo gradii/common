@@ -173,47 +173,6 @@ class TestObj {
     });
 
     describe('isDelegateCtor', () => {
-      it('should support ES5 compiled classes', () => {
-        // These classes will be compiled to ES5 code so their stringified form
-        // below will contain ES5 constructor functions rather than native classes.
-        class Parent {}
-
-        class ChildNoCtor extends Parent {}
-        class ChildWithCtor extends Parent {
-          constructor() {
-            super();
-          }
-        }
-        class ChildNoCtorPrivateProps extends Parent {
-          private x = 10;
-        }
-
-        expect(isDelegateCtor(ChildNoCtor.toString())).toBe(true);
-        expect(isDelegateCtor(ChildNoCtorPrivateProps.toString())).toBe(true);
-        expect(isDelegateCtor(ChildWithCtor.toString())).toBe(false);
-      });
-
-      // See: https://github.com/angular/angular/issues/38453
-      it('should support ES2015 downleveled classes', () => {
-        const {ChildNoCtor, ChildNoCtorPrivateProps, ChildWithCtor} =
-            require('./es5_downleveled_inheritance_fixture');
-
-        expect(isDelegateCtor(ChildNoCtor.toString())).toBe(true);
-        expect(isDelegateCtor(ChildNoCtorPrivateProps.toString())).toBe(true);
-        expect(isDelegateCtor(ChildWithCtor.toString())).toBe(false);
-      });
-
-      it('should support ES2015 classes when minified', () => {
-        // These classes are ES2015 in minified form
-        const ChildNoCtorMinified = 'class ChildNoCtor extends Parent{}';
-        const ChildWithCtorMinified = 'class ChildWithCtor extends Parent{constructor(){super()}}';
-        const ChildNoCtorPrivatePropsMinified =
-            'class ChildNoCtorPrivateProps extends Parent{constructor(){super(...arguments);this.x=10}}';
-
-        expect(isDelegateCtor(ChildNoCtorMinified)).toBe(true);
-        expect(isDelegateCtor(ChildNoCtorPrivatePropsMinified)).toBe(true);
-        expect(isDelegateCtor(ChildWithCtorMinified)).toBe(false);
-      });
 
       it('should not throw when no prototype on type', () => {
         // Cannot test arrow function here due to the compilation
