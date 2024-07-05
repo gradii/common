@@ -30,8 +30,13 @@ describe('plural', () => {
     expect(value).toBe(true);
   });
 
-  test ('pluralize study', () => {
+  test('pluralize study', () => {
     const value = pluralStudy('fedaco_builder_test_model_close_related_stub');
     expect(value).toBe('fedaco_builder_test_model_close_related_stubs');
-  })
+  });
+
+  test('regex', () => {
+    const matches = 'public"fff'.match(/[^s,"']+/g);
+    console.log(matches)
+  });
 });

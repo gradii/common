@@ -1,5 +1,6 @@
-
 // import { uniqBy } from 'ramda';
+
+import { uniqBy } from '../../src/collection/uniq-by';
 
 describe('uniqBy', function() {
 
@@ -8,17 +9,17 @@ describe('uniqBy', function() {
   });
 
   it('keeps elements from the left', function() {
-    expect(uniqBy([-1, 2, 4, 3, 1, 3], Math.abs), [-1, 2, 4, 3]);
+    expect(uniqBy([-1, 2, 4, 3, 1, 3], Math.abs)).toEqual([-1, 2, 4, 3]);
   });
 
   it('returns an empty array for an empty array', function() {
-    expect(uniqBy([], x=>x)).toEqual([]);
+    expect(uniqBy([], x => x)).toEqual([]);
   });
 
   it('has R.equals semantics', function() {
-    expect(uniqBy([-0, 0], x=>x)).toEqual([]);
-    expect(uniqBy([NaN, NaN], x=>x)).toEqual([]);
-    expect(uniqBy([], x=>x)).toEqual([]);
+    expect(uniqBy([-0, 0], x => x)).toEqual([]);
+    expect(uniqBy([NaN, NaN], x => x)).toEqual([]);
+    expect(uniqBy([], x => x)).toEqual([]);
   });
 
 });
