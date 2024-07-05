@@ -71,7 +71,7 @@ const reUnicodeWords = RegExp([
  * @returns {Array} Returns the words of `string`.
  */
 export function _unicodeWords(str: string): string[] {
-  return str.match(reUnicodeWords);
+  return str.match(reUnicodeWords) as string[];
 }
 
 

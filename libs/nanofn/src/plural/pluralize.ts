@@ -29,11 +29,12 @@ export function plural(word: string): string {
 
 export function pluralStudy(word: string): string {
   return words(word)
-    .reduce((result, word, index, arr) => {
+    .reduce((result: string[], word: string, index, arr) => {
       if (arr.length - 1 === index) {
         result.push(plural(word.toLowerCase()));
+      } else {
+        result.push(word.toLowerCase());
       }
-      result.push(word.toLowerCase());
       return result;
     }, []).join('_');
 }
