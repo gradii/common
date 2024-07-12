@@ -23,7 +23,7 @@ export { constantCase } from './case/constant-case';
 export { upperCase } from './case/upper-case';
 export { upperFirst } from './case/upper-first';
 
-export { plural, pluralStudy, singular } from './plural/pluralize';
+export { plural, pluralStudly, singular } from './plural/pluralize';
 export { debounce } from './fn/debounce';
 
 export { difference } from './collection/difference';

@@ -1,4 +1,4 @@
-import { isSingular, plural, pluralStudy, singular } from '../../src/plural/pluralize';
+import { isSingular, plural, pluralStudly, singular } from '../../src/plural/pluralize';
 
 describe('plural', () => {
 
@@ -31,7 +31,7 @@ describe('plural', () => {
   });
 
   test('pluralize study', () => {
-    const value = pluralStudy('fedaco_builder_test_model_close_related_stub');
+    const value = pluralStudly('fedaco_builder_test_model_close_related_stub');
     expect(value).toBe('fedaco_builder_test_model_close_related_stubs');
   });
 
@@ -39,4 +39,9 @@ describe('plural', () => {
     const matches = 'public"fff'.match(/[^s,"']+/g);
     console.log(matches)
   });
+
+  test('pluralize study with dot', () => {
+    const value = pluralStudly('schema.fedaco_builder_test_model_close_related_stub');
+    expect(value).toBe('schema_fedaco_builder_test_model_close_related_stubs');
+  })
 });

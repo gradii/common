@@ -27,7 +27,7 @@ export function plural(word: string): string {
   return validate(word);
 }
 
-export function pluralStudy(word: string): string {
+export function pluralStudly(word: string): string {
   return words(word)
     .reduce((result: string[], word: string, index, arr) => {
       if (arr.length - 1 === index) {
