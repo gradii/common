@@ -16,6 +16,8 @@
     "baseUrl": ".",
     "paths": {
       "@gradii/nanofn": ["libs/nanofn/src/index.ts"],
+      "@gradii/nest-http-client": ["libs/nest-http-client/src/index.ts"],
+      "@gradii/http-client": ["libs/http-client/src/index.ts"],
       "@gradii/vector-math": ["libs/vector-math/src/index.ts"]
     }
   },

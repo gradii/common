@@ -1,0 +1,33 @@
+{
+  "name": "nest-http-client",
+  "$schema": "../../node_modules/nx/schemas/project-schema.json",
+  "sourceRoot": "libs/nest-http-client/src",
+  "projectType": "library",
+  "release": {
+    "version": {
+      "generatorOptions": {
+        "packageRoot": "dist/{projectRoot}",
+        "currentVersionResolver": "git-tag"
+      }
+    }
+  },
+  "tags": [],
+  "targets": {
+    "build": {
+      "executor": "@nx/js:tsc",
+      "outputs": ["{options.outputPath}"],
+      "options": {
+        "outputPath": "dist/libs/nest-http-client",
+        "tsConfig": "libs/nest-http-client/tsconfig.lib.json",
+        "packageJson": "libs/nest-http-client/package.json",
+        "main": "libs/nest-http-client/src/index.ts",
+        "assets": ["libs/nest-http-client/*.md"]
+      }
+    },
+    "nx-release-publish": {
+      "options": {
+        "packageRoot": "dist/{projectRoot}"
+      }
+    }
+  }
+}

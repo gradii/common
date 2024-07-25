@@ -129,7 +129,7 @@ export class HttpRequest<T> {
     // 检查正文是否已经是序列化的形式。如果是，则直接返回。
     if (isArrayBuffer(this.body) || isBlob(this.body) || isFormData(this.body) || isUrlSearchParams(
       this.body) || typeof this.body === 'string') {
-      return this.body;
+      return this.body as ArrayBuffer | Blob | FormData | string ;
     }
     // 检查 body 是否为 HttpUrlEncodedParams 的实例。
     if (this.body instanceof HttpParams) {
