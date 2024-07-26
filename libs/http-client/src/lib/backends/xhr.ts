@@ -13,7 +13,10 @@ import { Observable, Observer } from 'rxjs';
 import { HttpBackend } from '../backend';
 import { HttpHeaders } from '../headers';
 import { HttpRequest } from '../request';
-import { HttpDownloadProgressEvent, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaderResponse, HttpJsonParseError, HttpResponse, HttpStatusCode, HttpUploadProgressEvent } from '../response';
+import {
+  HttpDownloadProgressEvent, HttpErrorResponse, HttpEvent, HttpEventType, HttpHeaderResponse, HttpJsonParseError,
+  HttpResponse, HttpStatusCode, HttpUploadProgressEvent
+} from '../response';
 
 const XSSI_PREFIX = /^\)\]\}',?\n/;
 
@@ -102,7 +105,7 @@ export class HttpXhrBackend implements HttpBackend {
         }
 
         const status: number = xhr.status;
-        const statusText = xhr.statusText || 'OK';
+        const statusText     = xhr.statusText || 'OK';
 
         // Parse headers from XMLHttpRequest - this step is lazy.
         const headers = new HttpHeaders(xhr.getAllResponseHeaders());
@@ -148,7 +151,7 @@ export class HttpXhrBackend implements HttpBackend {
         if (req.responseType === 'json' && typeof body === 'string') {
           // Save the original body, before attempting XSSI prefix stripping.
           const originalBody = body;
-          body = body.replace(XSSI_PREFIX, '');
+          body               = body.replace(XSSI_PREFIX, '');
           try {
             // Attempt the parse. If it fails, a parse error should be delivered to the user.
             body = body !== '' ? JSON.parse(body) : null;
@@ -162,7 +165,7 @@ export class HttpXhrBackend implements HttpBackend {
             // just isn't JSON. Otherwise, deliver the parsing error to the user.
             if (ok) {
               // Even though the response status was 2xx, this is still an error.
-              ok = false;
+              ok   = false;
               // The parse error contains the text of the body that failed to parse.
               body = { error, text: body } as HttpJsonParseError;
             }
@@ -176,7 +179,7 @@ export class HttpXhrBackend implements HttpBackend {
             headers,
             status,
             statusText,
-            url: url || undefined,
+            url: url || undefined
           }));
           // The full body has been received and delivered, no further events
           // are possible. This request is complete.
@@ -189,7 +192,7 @@ export class HttpXhrBackend implements HttpBackend {
             headers,
             status,
             statusText,
-            url: url || undefined,
+            url  : url || undefined
           }));
         }
       };
@@ -199,11 +202,11 @@ export class HttpXhrBackend implements HttpBackend {
       // transmitted on the error channel.
       const onError = (error: ProgressEvent) => {
         const { url } = partialFromXhr();
-        const res = new HttpErrorResponse({
+        const res     = new HttpErrorResponse({
           error,
-          status: xhr.status || 0,
+          status    : xhr.status || 0,
           statusText: xhr.statusText || 'Unknown Error',
-          url: url || undefined,
+          url       : url || undefined
         });
         observer.error(res);
       };
@@ -226,8 +229,8 @@ export class HttpXhrBackend implements HttpBackend {
         // Start building the download progress event to deliver on the response
         // event stream.
         const progressEvent: HttpDownloadProgressEvent = {
-          type: HttpEventType.DownloadProgress,
-          loaded: event.loaded,
+          type  : HttpEventType.DownloadProgress,
+          loaded: event.loaded
         };
 
         // Set the total number of bytes in the event if it's available.
@@ -252,8 +255,8 @@ export class HttpXhrBackend implements HttpBackend {
         // Upload progress events are simpler. Begin building the progress
         // event.
         const progress: HttpUploadProgressEvent = {
-          type: HttpEventType.UploadProgress,
-          loaded: event.loaded,
+          type  : HttpEventType.UploadProgress,
+          loaded: event.loaded
         };
 
         // If the total number of bytes being uploaded is available, include

@@ -155,6 +155,14 @@ export class HttpErrorResponse extends HttpResponseBase implements Error {
 }
 
 /**
+ * We use these constant to prevent pulling the whole HttpStatusCode enum
+ * Those are the only ones referenced directly by the framework
+ */
+export const HTTP_STATUS_CODE_OK = 200;
+export const HTTP_STATUS_CODE_NO_CONTENT = 204;
+
+
+/**
  * Http status codes.
  * As per https://www.iana.org/assignments/http-status-codes/http-status-codes.xhtml
  * @publicApi
