@@ -1,4 +1,4 @@
-function _includesWith(list: any[], x: any, pred: (value: any, list: any[]) => boolean): boolean {
+function _includesWith<T, R>(list: R[], x: T, pred: (valueX: T, valueListItem: R) => boolean): boolean {
   let idx   = 0;
   const len = list.length;
 
@@ -32,10 +32,11 @@ function _includesWith(list: any[], x: any, pred: (value: any, list: any[]) => b
  *      differenceWith(equals, [1, 2, 3, 3, 3], []); //=> [1, 2, 3]
  *      differenceWith(equals, [1, 2, 3, 3, 3], [1]); //=> [2, 3]
  */
-export function differenceWith(first: any[], second: any[], predicate: (value: any, list: any[]) => boolean): any[] {
-  const out: any[]      = [];
-  let idx        = 0;
-  const firstLen = first.length;
+export function differenceWith<T = any, R = any>(first: T[], second: R[],
+                                                 predicate: (valueFirst: T, valueSecond: R) => boolean): any[] {
+  const out: any[] = [];
+  let idx          = 0;
+  const firstLen   = first.length;
   while (idx < firstLen) {
     if (!_includesWith(second, first[idx], predicate) &&
       !_includesWith(out, first[idx], predicate)) {
