@@ -3,6 +3,10 @@ import { HttpHeaders } from './headers';
 import { HttpParams } from './params';
 
 type Property<T> = Omit<T, { [K in keyof T]: T[K] extends (...args: any[]) => any ? K : never }[keyof T]>;
+type Params = HttpParams
+  | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>} | null;
+type Headers = HttpHeaders | {[header: string]: string | string[]};
+
 
 /**
  * Safely assert whether the given value is an ArrayBuffer.
@@ -51,8 +55,8 @@ export class HttpRequest<T> {
     public readonly url: string,
     options?: {
       body?: T,
-      params?: HttpParams | ConstructorParameters<typeof HttpParams>[0] | null,
-      headers?: HttpHeaders | ConstructorParameters<typeof HttpHeaders>[0],
+      params?: Params,
+      headers?: Headers,
       context?: HttpContext,
       responseType?: HttpRequest<unknown>['responseType'],
       reportProgress?: boolean,
