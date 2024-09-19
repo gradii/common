@@ -11,8 +11,9 @@ import { HttpRequest } from './request';
 import { HttpEvent, HttpResponse } from './response';
 
 type Body = HttpRequest<any>['body'];
-type Params = ConstructorParameters<typeof HttpParams>[0] | HttpParams | null;
-type Headers = ConstructorParameters<typeof HttpHeaders>[0] | HttpHeaders;
+type Params = HttpParams
+  | {[param: string]: string | number | boolean | ReadonlyArray<string | number | boolean>} | null;
+type Headers = HttpHeaders | {[header: string]: string | string[]};
 type ResponseType = HttpRequest<any>['responseType'];
 
 interface RequestOptions<T extends ResponseType = ResponseType> {
