@@ -1,4 +1,4 @@
-import { equalsFn } from './equals'
+import {  equals as equalsFn } from './equals'
 
 test('compare functions', () => {
   function foo() {}

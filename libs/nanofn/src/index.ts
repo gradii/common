@@ -46,3 +46,4 @@ export { last } from './collection/last';
 export { pluck } from './collection/pluck';
 export { findLast } from './collection/find-last';
 export { partition } from './collection/partition';
+export { lastIndexOf } from './collection/lastIndex-of';
