@@ -9,6 +9,10 @@ export function last<T extends string>(str: T): T extends '' ? undefined : strin
 export function last<T extends readonly any[]>(list: T): T[number] | undefined;
 export function last<T extends ArrayLike<any>>(list: T): T extends { length: 0 } ? undefined : T[number];
 
+/**
+ * will be removed use array native .at(-1) instead
+ * @param listOrString
+ */
 export function last(listOrString: any) {
   if (!listOrString || listOrString.length === 0) {
     return undefined;
