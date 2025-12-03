@@ -17,8 +17,8 @@ describe('uniqBy', function() {
   });
 
   it('has R.equals semantics', function() {
-    expect(uniqBy([-0, 0], x => x)).toEqual([]);
-    expect(uniqBy([NaN, NaN], x => x)).toEqual([]);
+    expect(uniqBy([-0, 0], x => x)).toEqual([-0]);
+    expect(uniqBy([NaN, NaN], x => x)).toEqual([NaN]);
     expect(uniqBy([], x => x)).toEqual([]);
   });
 
