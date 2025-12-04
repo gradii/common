@@ -6,7 +6,7 @@ test('with string as condition', () => {
     b: 2,
     c: 3,
   }
-  const result = omit('a,c'.split(','), obj)
+  const result = omit(obj, 'a,c'.split(','))
   const expectedResult = { b: 2 }
 
   expect(result).toEqual(expectedResult)
@@ -14,10 +14,13 @@ test('with string as condition', () => {
 
 test('with array as condition', () => {
   expect(
-    omit(['a', 'c', 'd'], {
-      a: 'foo',
-      b: 'bar',
-      c: 'baz',
-    }),
-  ).toEqual({ b: 'bar' })
+    omit(
+      {
+        a: 'foo',
+        b: 'bar',
+        c: 'baz',
+      },
+      ['a', 'c', 'd'],
+    ),
+  ).toEqual({ b: 'bar' });
 })

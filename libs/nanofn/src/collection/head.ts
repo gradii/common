@@ -8,5 +8,5 @@ export function head<T>(listOrString: T): T extends [] ? undefined :
         T extends [infer F, ...infer R] ? F :
           T extends unknown[] ? T[number] :
             undefined {
-  return listOrString[0];
+  return (listOrString as any)[0];
 }

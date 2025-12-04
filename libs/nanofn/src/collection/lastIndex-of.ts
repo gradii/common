@@ -1,4 +1,5 @@
 import { _lastIndexOf } from '../fn/equals';
+
 /**
  * It returns the last index of `target` in `list` array.
  *
@@ -8,6 +9,6 @@ import { _lastIndexOf } from '../fn/equals';
  */
 export function lastIndexOf<T>(list: T[], target: T): number;
 
-export function lastIndexOf(list, valueToFind) {
+export function lastIndexOf(list: any[], valueToFind: any): number {
   return _lastIndexOf(valueToFind, list);
 }

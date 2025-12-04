@@ -1,14 +1,14 @@
 export function pick<T, K extends string | number | symbol>(
+  obj: T,
   names: readonly K[],
-  obj: T
 ): { [P in keyof T as P extends K ? P : never]: T[P] };
 
-export function pick(names: any[], obj: any): any {
+export function pick(obj: any, names: readonly any[]): any {
   if (obj == null) {
     return undefined;
   }
   const keys = names;
-  const willReturn = {};
+  const willReturn: any = {};
   let counter = 0;
 
   while (counter < keys.length) {

@@ -24,7 +24,7 @@ export function _lastIndexOf(list: any[], valueToFind: any): number {
   return foundIndex;
 }
 
-export function _indexOf(valueToFind, list) {
+export function _indexOf(valueToFind: any, list: any[]) {
   if (!isArray(list)) {
     throw new Error(`Cannot read property 'indexOf' of ${list}`);
   }
@@ -47,7 +47,7 @@ export function _indexOf(valueToFind, list) {
   return foundIndex;
 }
 
-function _arrayFromIterator(iter) {
+function _arrayFromIterator(iter: Iterator<any>) {
   const list = [];
   let next;
   while (!(next = iter.next()).done) {
@@ -57,7 +57,7 @@ function _arrayFromIterator(iter) {
   return list;
 }
 
-function _compareSets(a, b) {
+function _compareSets(a: Set<any>, b: Set<any>) {
   if (a.size !== b.size) {
     return false;
   }
@@ -65,14 +65,12 @@ function _compareSets(a, b) {
   const aList = _arrayFromIterator(a.values());
   const bList = _arrayFromIterator(b.values());
 
-  const filtered = aList.filter(
-    (aInstance) => _indexOf(aInstance, bList) === -1
-  );
+  const filtered = aList.filter((aInstance) => _indexOf(aInstance, bList) === -1);
 
   return filtered.length === 0;
 }
 
-function compareErrors(a, b) {
+function compareErrors(a: Error, b: Error) {
   if (a.message !== b.message) {
     return false;
   }
@@ -83,7 +81,7 @@ function compareErrors(a, b) {
   return a.toString() === b.toString();
 }
 
-function parseDate(maybeDate) {
+function parseDate(maybeDate: Date | any) {
   if (!maybeDate.toDateString) {
     return [false];
   }
@@ -91,7 +89,7 @@ function parseDate(maybeDate) {
   return [true, maybeDate.getTime()];
 }
 
-function parseRegex(maybeRegex) {
+function parseRegex(maybeRegex: RegExp | any) {
   if (maybeRegex.constructor !== RegExp) {
     return [false];
   }
@@ -142,10 +140,7 @@ export function equals(a: any, b: any): boolean {
     let loopArrayFlag = true;
     aClone.forEach((aCloneInstance, aCloneIndex) => {
       if (loopArrayFlag) {
-        if (
-          aCloneInstance !== bClone[aCloneIndex] &&
-          !equals(aCloneInstance, bClone[aCloneIndex])
-        ) {
+        if (aCloneInstance !== bClone[aCloneIndex] && !equals(aCloneInstance, bClone[aCloneIndex])) {
           loopArrayFlag = false;
         }
       }

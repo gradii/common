@@ -13,7 +13,7 @@ test('happy', () => {
     d: 4,
   }
 
-  const result = partitionObj(predicate, hash)
+  const result = partitionObj(hash, predicate);
   const expectedResult = [
     {
       c: 3,
@@ -23,7 +23,7 @@ test('happy', () => {
       a: 1,
       b: 2,
     },
-  ]
+  ];
 
   expect(result).toEqual(expectedResult)
 })
