@@ -12,7 +12,36 @@ export { pick } from './obj/pick';
 export { filterObj } from './obj/filter-obj';
 export { partitionObj } from './obj/partition-obj';
 
-export * from './check-type';
+export {
+  isPresent,
+  isBlank,
+  isNumber,
+  isInteger,
+  isArray,
+  isFunction,
+  isString,
+  isObject,
+  isObjectLike,
+  isRegex,
+  isTruthy,
+  isNullOrEmptyString,
+  isNotNullOrEmptyString,
+  isNumeric,
+  isDate,
+  isMap,
+  isSet,
+  isSymbol,
+  isBoolean,
+  isPromise,
+  isInfinite,
+  isEquivalent,
+  isNonEmptyString,
+  isObjectEmpty,
+  isStringEmpty,
+  has,
+  isAnyEmpty,
+  isIterable,
+} from './check-type';
 
 export { camelCase } from './case/camel-case';
 export { capitalCase } from './case/capital-case';
