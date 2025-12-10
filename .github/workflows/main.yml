@@ -20,19 +20,15 @@ jobs:
           - '20'
     name: Node ${{ matrix.node }} sample
     steps:
-      - uses: actions/checkout@v2
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 5 # Not needed if lastUpdated is not enabled
       - name: Setup node
-        uses: actions/setup-node@v1
+        uses: actions/setup-node@v6
         with:
           node-version: "${{ matrix.node }}"
-      - uses: actions/cache@v2
-        id: yarn-cache
-        with:
-          path: |
-            node_modules
-            **/node_modules
-          key: "${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}"
-          restore-keys: "${{ runner.os }}-yarn-\n"
+          cache: yarn
       - name: Installing project dependencies
         run: yarn install --frozen-lockfile --non-interactive
       - name: test fedaco
