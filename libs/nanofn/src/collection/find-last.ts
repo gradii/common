@@ -4,8 +4,8 @@
  * If there is no such element, then `undefined` is returned.
  */
 export function findLast<T>(
+  list: T[],
   predicate: (x: T) => boolean,
-  list: T[]
 ): T | undefined {
   let index = list.length;
 
