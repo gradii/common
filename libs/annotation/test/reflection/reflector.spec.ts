@@ -1,4 +1,5 @@
 /* tslint:disable:variable-name */
+import 'reflect-metadata';
 import { makeDecorator, makeParamDecorator, makePropDecorator } from '../../src/decorators';
 import { ReflectionCapabilities } from '../../src/reflection/reflection_capabilities';
 import { Reflector } from '../../src/reflection/reflector';
