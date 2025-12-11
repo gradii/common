@@ -1,9 +1,9 @@
-import {ANNOTATIONS, PARAMETERS, PROP_METADATA} from '../decorators';
-import {global} from '../global';
-import {stringify} from '../stringify';
+import { ANNOTATIONS, PARAMETERS, PROP_METADATA } from '../decorators';
+import { global } from '../global';
+import { stringify } from '../stringify';
 
-import {PlatformReflectionCapabilities} from './platform_reflection_capabilities';
-import {GetterFn, MethodFn, SetterFn} from './types';
+import { PlatformReflectionCapabilities } from './platform_reflection_capabilities';
+import { GetterFn, MethodFn, SetterFn } from './types';
 
 export class ReflectionCapabilities implements PlatformReflectionCapabilities {
   private _reflect: any;
@@ -48,8 +48,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return result;
   }
 
-  private _ownParameters(type: any, parentCtor: any): any[][]|null {
-
+  private _ownParameters(type: any, parentCtor: any): any[][] | null {
     // Prefer the direct API.
     if ((<any>type).parameters && (<any>type).parameters !== parentCtor.parameters) {
       return (<any>type).parameters;
@@ -60,19 +59,18 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     if (tsickleCtorParams && tsickleCtorParams !== parentCtor.ctorParameters) {
       // Newer tsickle uses a function closure
       // Retain the non-function case for compatibility with older tsickle
-      const ctorParameters =
-          typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
+      const ctorParameters = typeof tsickleCtorParams === 'function' ? tsickleCtorParams() : tsickleCtorParams;
       const paramTypes = ctorParameters.map((ctorParam: any) => ctorParam && ctorParam.type);
       const paramAnnotations = ctorParameters.map(
-          (ctorParam: any) =>
-              ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators));
+        (ctorParam: any) => ctorParam && convertTsickleDecoratorIntoMetadata(ctorParam.decorators)
+      );
       return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
     }
 
     // API for metadata created by invoking the decorators.
     const paramAnnotations = type.hasOwnProperty(PARAMETERS) && (type as any)[PARAMETERS];
-    const paramTypes = this._reflect && this._reflect.getOwnMetadata &&
-        this._reflect.getOwnMetadata('design:paramtypes', type);
+    const paramTypes =
+      this._reflect && this._reflect.getOwnMetadata && this._reflect.getOwnMetadata('design:paramtypes', type);
     if (paramTypes || paramAnnotations) {
       return this._zipTypesAndAnnotations(paramTypes, paramAnnotations);
     }
@@ -81,7 +79,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     // based on function.length.
     // Note: We know that this is a real constructor as we checked
     // the content of the constructor above.
-    return new Array<any[]>(type.length);
+    return type.length > 0 ? new Array<any[]>(type.length) : null;
   }
 
   parameters(type: any): any[][] {
@@ -98,7 +96,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return parameters || [];
   }
 
-  private _ownAnnotations(typeOrFunc: any, parentCtor: any): any[]|null {
+  private _ownAnnotations(typeOrFunc: any, parentCtor: any): any[] | null {
     // Prefer the direct API.
     if ((<any>typeOrFunc).annotations && (<any>typeOrFunc).annotations !== parentCtor.annotations) {
       let annotations = (<any>typeOrFunc).annotations;
@@ -130,10 +128,9 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return parentAnnotations.concat(ownAnnotations);
   }
 
-  private _ownPropMetadata(typeOrFunc: any, parentCtor: any): {[key: string]: any[]}|null {
+  private _ownPropMetadata(typeOrFunc: any, parentCtor: any): { [key: string]: any[] } | null {
     // Prefer the direct API.
-    if ((<any>typeOrFunc).propMetadata &&
-        (<any>typeOrFunc).propMetadata !== parentCtor.propMetadata) {
+    if ((<any>typeOrFunc).propMetadata && (<any>typeOrFunc).propMetadata !== parentCtor.propMetadata) {
       let propMetadata = (<any>typeOrFunc).propMetadata;
       if (typeof propMetadata === 'function' && propMetadata.propMetadata) {
         propMetadata = propMetadata.propMetadata;
@@ -142,11 +139,10 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     }
 
     // API of tsickle for lowering decorators to properties on the class.
-    if ((<any>typeOrFunc).propDecorators &&
-        (<any>typeOrFunc).propDecorators !== parentCtor.propDecorators) {
+    if ((<any>typeOrFunc).propDecorators && (<any>typeOrFunc).propDecorators !== parentCtor.propDecorators) {
       const propDecorators = (<any>typeOrFunc).propDecorators;
-      const propMetadata = <{[key: string]: any[]}>{};
-      Object.keys(propDecorators).forEach(prop => {
+      const propMetadata = <{ [key: string]: any[] }>{};
+      Object.keys(propDecorators).forEach((prop) => {
         propMetadata[prop] = convertTsickleDecoratorIntoMetadata(propDecorators[prop]);
       });
       return propMetadata;
@@ -159,12 +155,12 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return null;
   }
 
-  propMetadata(typeOrFunc: any): {[key: string]: any[]} {
+  propMetadata(typeOrFunc: any): { [key: string]: any[] } {
     if (typeof typeOrFunc !== 'function') {
       return {};
     }
     const parentCtor = getParentCtor(typeOrFunc);
-    const propMetadata: {[key: string]: any[]} = {};
+    const propMetadata: { [key: string]: any[] } = {};
     if (parentCtor !== Object) {
       const parentPropMetadata = this.propMetadata(parentCtor);
       Object.keys(parentPropMetadata).forEach((propName) => {
@@ -185,7 +181,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return propMetadata;
   }
 
-  ownPropMetadata(typeOrFunc: any): {[key: string]: any[]} {
+  ownPropMetadata(typeOrFunc: any): { [key: string]: any[] } {
     if (typeof typeOrFunc !== 'function') {
       return {};
     }
@@ -196,7 +192,7 @@ export class ReflectionCapabilities implements PlatformReflectionCapabilities {
     return type instanceof Function && lcProperty in type.prototype;
   }
 
-  guards(type: any): {[key: string]: any} {
+  guards(type: any): { [key: string]: any } {
     return {};
   }
 
@@ -240,7 +236,7 @@ function convertTsickleDecoratorIntoMetadata(decoratorInvocations: any[]): any[]
   if (!decoratorInvocations) {
     return [];
   }
-  return decoratorInvocations.map(decoratorInvocation => {
+  return decoratorInvocations.map((decoratorInvocation) => {
     const decoratorType = decoratorInvocation.type;
     const annotationCls = decoratorType.annotationCls;
     const annotationArgs = decoratorInvocation.args ? decoratorInvocation.args : [];

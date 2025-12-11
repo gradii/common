@@ -5,7 +5,7 @@ import { Reflector } from '../../src/reflection/reflector';
 
 interface ClassDecoratorFactory {
   (data: ClassDecorator): any;
-  new(data: ClassDecorator): ClassDecorator;
+  new (data: ClassDecorator): ClassDecorator;
 }
 
 interface ClassDecorator {
@@ -20,30 +20,25 @@ interface PropDecorator {
   value: any;
 }
 
-/** @Annotation */ const ClassDecorator =
-    <ClassDecoratorFactory>makeDecorator('ClassDecorator', (data: any) => data);
-/** @Annotation */ const ParamDecorator =
-    makeParamDecorator('ParamDecorator', (value: any) => ({value}));
-/** @Annotation */ const PropDecorator =
-    makePropDecorator('PropDecorator', (value: any) => ({value}));
+/** @Annotation */ const ClassDecorator = <ClassDecoratorFactory>makeDecorator('ClassDecorator', (data: any) => data);
+/** @Annotation */ const ParamDecorator = makeParamDecorator('ParamDecorator', (value: any) => ({ value }));
+/** @Annotation */ const PropDecorator = makePropDecorator('PropDecorator', (value: any) => ({ value }));
 
 class AType {
   constructor(public value: any) {}
 }
 
-@ClassDecorator({value: 'class'})
+@ClassDecorator({ value: 'class' })
 class ClassWithDecorators {
   @PropDecorator('p1') @PropDecorator('p2') a: AType;
 
   b: AType;
 
   @PropDecorator('p3')
-  set c(value: any) {
-  }
+  set c(value: any) {}
 
   @PropDecorator('p4')
-  someMethod() {
-  }
+  someMethod() {}
 
   constructor(@ParamDecorator('a') a: AType, @ParamDecorator('b') b: AType) {
     this.a = a;
@@ -82,7 +77,10 @@ class TestObj {
     describe('parameters', () => {
       it('should return an array of parameters for a type', () => {
         const p = reflector.parameters(ClassWithDecorators);
-        expect(p).toEqual([[AType, new ParamDecorator('a')], [AType, new ParamDecorator('b')]]);
+        expect(p).toEqual([
+          [AType, new ParamDecorator('a')],
+          [AType, new ParamDecorator('b')],
+        ]);
       });
 
       it('should work for a class without annotations', () => {
@@ -96,13 +94,13 @@ class TestObj {
         class ForwardLegacy {
           constructor(d: Dep) {}
           // Older tsickle had a bug: wrote a forward reference
-          static ctorParameters = [{type: Dep}];
+          static ctorParameters = [{ type: Dep }];
         }
         expect(reflector.parameters(ForwardLegacy)).toEqual([[Dep]]);
         class Forward {
           constructor(d: Dep) {}
           // Newer tsickle generates a functionClosure
-          static ctorParameters = () => [{type: ForwardDep}];
+          static ctorParameters = () => [{ type: ForwardDep }];
         }
         class ForwardDep {}
         expect(reflector.parameters(Forward)).toEqual([[ForwardDep]]);
@@ -113,7 +111,7 @@ class TestObj {
 
         class TestService {
           constructor() {}
-          static ctorParameters = () => [{type: undefined, decorators: []}, {type: Dep}];
+          static ctorParameters = () => [{ type: undefined, decorators: [] }, { type: Dep }];
         }
         expect(reflector.parameters(TestService)).toEqual([[], [Dep]]);
       });
@@ -132,14 +130,14 @@ class TestObj {
           @PropDecorator('test') prop: any;
         }
 
-        expect(reflector.propMetadata(Test)).toEqual({'prop': [new PropDecorator('test')]});
+        expect(reflector.propMetadata(Test)).toEqual({ prop: [new PropDecorator('test')] });
       });
     });
 
     describe('annotations', () => {
       it('should return an array of annotations for a type', () => {
         const p = reflector.annotations(ClassWithDecorators);
-        expect(p).toEqual([new ClassDecorator({value: 'class'})]);
+        expect(p).toEqual([new ClassDecorator({ value: 'class' })]);
       });
 
       it('should work for a class without annotations', () => {
@@ -173,11 +171,10 @@ class TestObj {
     });
 
     describe('isDelegateCtor', () => {
-
       it('should not throw when no prototype on type', () => {
         // Cannot test arrow function here due to the compilation
-        const dummyArrowFn = function() {};
-        Object.defineProperty(dummyArrowFn, 'prototype', {value: undefined});
+        const dummyArrowFn = function () {};
+        Object.defineProperty(dummyArrowFn, 'prototype', { value: undefined });
         expect(() => reflector.annotations(dummyArrowFn as any)).not.toThrow();
       });
 
@@ -226,27 +223,25 @@ class TestObj {
 
     describe('inheritance with decorators', () => {
       it('should inherit annotations', () => {
-        @ClassDecorator({value: 'parent'})
-        class Parent {
-        }
+        @ClassDecorator({ value: 'parent' })
+        class Parent {}
 
-        @ClassDecorator({value: 'child'})
-        class Child extends Parent {
-        }
+        @ClassDecorator({ value: 'child' })
+        class Child extends Parent {}
 
         class ChildNoDecorators extends Parent {}
 
         class NoDecorators {}
 
         // Check that metadata for Parent was not changed!
-        expect(reflector.annotations(Parent)).toEqual([new ClassDecorator({value: 'parent'})]);
+        expect(reflector.annotations(Parent)).toEqual([new ClassDecorator({ value: 'parent' })]);
 
         expect(reflector.annotations(Child)).toEqual([
-          new ClassDecorator({value: 'parent'}), new ClassDecorator({value: 'child'})
+          new ClassDecorator({ value: 'parent' }),
+          new ClassDecorator({ value: 'child' }),
         ]);
 
-        expect(reflector.annotations(ChildNoDecorators)).toEqual([new ClassDecorator(
-            {value: 'parent'})]);
+        expect(reflector.annotations(ChildNoDecorators)).toEqual([new ClassDecorator({ value: 'parent' })]);
 
         expect(reflector.annotations(NoDecorators)).toEqual([]);
         expect(reflector.annotations(<any>{})).toEqual([]);
@@ -261,25 +256,24 @@ class TestObj {
 
         // Note: We need the class decorator as well,
         // as otherwise TS won't capture the ctor arguments!
-        @ClassDecorator({value: 'parent'})
+        @ClassDecorator({ value: 'parent' })
         class Parent {
           constructor(@ParamDecorator('a') a: A, @ParamDecorator('b') b: B) {}
         }
 
         class Child extends Parent {}
 
-        @ClassDecorator({value: 'child'})
-        class ChildWithDecorator extends Parent {
-        }
+        @ClassDecorator({ value: 'child' })
+        class ChildWithDecorator extends Parent {}
 
-        @ClassDecorator({value: 'child'})
+        @ClassDecorator({ value: 'child' })
         class ChildWithDecoratorAndProps extends Parent {
           private x = 10;
         }
 
         // Note: We need the class decorator as well,
         // as otherwise TS won't capture the ctor arguments!
-        @ClassDecorator({value: 'child'})
+        @ClassDecorator({ value: 'child' })
         class ChildWithCtor extends Parent {
           constructor(@ParamDecorator('c') c: C) {
             super(null!, null!);
@@ -296,28 +290,30 @@ class TestObj {
 
         // Check that metadata for Parent was not changed!
         expect(reflector.parameters(Parent)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(Child)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(ChildWithDecorator)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(ChildWithDecoratorAndProps)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(ChildWithCtor)).toEqual([[C, new ParamDecorator('c')]]);
 
         // If we have no decorator, we don't get metadata about the ctor params.
         // But we should still get an array of the right length based on function.length.
-        expect(reflector.parameters(ChildWithCtorNoDecorator)).toEqual([
-          undefined, undefined, undefined
-        ] as any[]);  // TODO: Review use of `any` here (#19904)
+        expect(reflector.parameters(ChildWithCtorNoDecorator)).toEqual([undefined, undefined, undefined] as any[]); // TODO: Review use of `any` here (#19904)
 
         expect(reflector.parameters(NoDecorators)).toEqual([]);
         expect(reflector.parameters(<any>{})).toEqual([]);
@@ -348,14 +344,14 @@ class TestObj {
 
         // Check that metadata for Parent was not changed!
         expect(reflector.propMetadata(Parent)).toEqual({
-          'a': [new PropDecorator('a')],
-          'b': [new PropDecorator('b1')],
+          a: [new PropDecorator('a')],
+          b: [new PropDecorator('b1')],
         });
 
         expect(reflector.propMetadata(Child)).toEqual({
-          'a': [new PropDecorator('a')],
-          'b': [new PropDecorator('b1'), new PropDecorator('b2')],
-          'c': [new PropDecorator('c')]
+          a: [new PropDecorator('a')],
+          b: [new PropDecorator('b1'), new PropDecorator('b2')],
+          c: [new PropDecorator('c')],
         });
 
         expect(reflector.propMetadata(NoDecorators)).toEqual({});
@@ -376,7 +372,7 @@ class TestObj {
         }
 
         function hooks(symbol: any, names: string[]): boolean[] {
-          return names.map(name => reflector.hasLifecycleHook(symbol, name));
+          return names.map((name) => reflector.hasLifecycleHook(symbol, name));
         }
 
         // Check that metadata for Parent was not changed!
@@ -389,24 +385,24 @@ class TestObj {
     describe('inheritance with tsickle', () => {
       it('should inherit annotations', () => {
         class Parent {
-          static decorators = [{type: ClassDecorator, args: [{value: 'parent'}]}];
+          static decorators = [{ type: ClassDecorator, args: [{ value: 'parent' }] }];
         }
 
         class Child extends Parent {
-          static decorators = [{type: ClassDecorator, args: [{value: 'child'}]}];
+          static decorators = [{ type: ClassDecorator, args: [{ value: 'child' }] }];
         }
 
         class ChildNoDecorators extends Parent {}
 
         // Check that metadata for Parent was not changed!
-        expect(reflector.annotations(Parent)).toEqual([new ClassDecorator({value: 'parent'})]);
+        expect(reflector.annotations(Parent)).toEqual([new ClassDecorator({ value: 'parent' })]);
 
         expect(reflector.annotations(Child)).toEqual([
-          new ClassDecorator({value: 'parent'}), new ClassDecorator({value: 'child'})
+          new ClassDecorator({ value: 'parent' }),
+          new ClassDecorator({ value: 'child' }),
         ]);
 
-        expect(reflector.annotations(ChildNoDecorators)).toEqual([new ClassDecorator(
-            {value: 'parent'})]);
+        expect(reflector.annotations(ChildNoDecorators)).toEqual([new ClassDecorator({ value: 'parent' })]);
       });
 
       it('should inherit parameters', () => {
@@ -415,18 +411,16 @@ class TestObj {
         class C {}
 
         class Parent {
-          static ctorParameters = () =>
-              [{type: A, decorators: [{type: ParamDecorator, args: ['a']}]},
-               {type: B, decorators: [{type: ParamDecorator, args: ['b']}]},
-          ]
+          static ctorParameters = () => [
+            { type: A, decorators: [{ type: ParamDecorator, args: ['a'] }] },
+            { type: B, decorators: [{ type: ParamDecorator, args: ['b'] }] },
+          ];
         }
 
         class Child extends Parent {}
 
         class ChildWithCtor extends Parent {
-          static ctorParameters = () =>
-              [{type: C, decorators: [{type: ParamDecorator, args: ['c']}]},
-          ]
+          static ctorParameters = () => [{ type: C, decorators: [{ type: ParamDecorator, args: ['c'] }] }];
           constructor() {
             super();
           }
@@ -434,11 +428,13 @@ class TestObj {
 
         // Check that metadata for Parent was not changed!
         expect(reflector.parameters(Parent)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(Child)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(ChildWithCtor)).toEqual([[C, new ParamDecorator('c')]]);
@@ -451,28 +447,28 @@ class TestObj {
 
         class Parent {
           static propDecorators: any = {
-            'a': [{type: PropDecorator, args: ['a']}],
-            'b': [{type: PropDecorator, args: ['b1']}],
+            a: [{ type: PropDecorator, args: ['a'] }],
+            b: [{ type: PropDecorator, args: ['b1'] }],
           };
         }
 
         class Child extends Parent {
           static propDecorators: any = {
-            'b': [{type: PropDecorator, args: ['b2']}],
-            'c': [{type: PropDecorator, args: ['c']}],
+            b: [{ type: PropDecorator, args: ['b2'] }],
+            c: [{ type: PropDecorator, args: ['c'] }],
           };
         }
 
         // Check that metadata for Parent was not changed!
         expect(reflector.propMetadata(Parent)).toEqual({
-          'a': [new PropDecorator('a')],
-          'b': [new PropDecorator('b1')],
+          a: [new PropDecorator('a')],
+          b: [new PropDecorator('b1')],
         });
 
         expect(reflector.propMetadata(Child)).toEqual({
-          'a': [new PropDecorator('a')],
-          'b': [new PropDecorator('b1'), new PropDecorator('b2')],
-          'c': [new PropDecorator('c')]
+          a: [new PropDecorator('a')],
+          b: [new PropDecorator('b1'), new PropDecorator('b2')],
+          c: [new PropDecorator('c')],
         });
       });
     });
@@ -480,24 +476,24 @@ class TestObj {
     describe('inheritance with es5 API', () => {
       it('should inherit annotations', () => {
         class Parent {
-          static annotations = [new ClassDecorator({value: 'parent'})];
+          static annotations = [new ClassDecorator({ value: 'parent' })];
         }
 
         class Child extends Parent {
-          static annotations = [new ClassDecorator({value: 'child'})];
+          static annotations = [new ClassDecorator({ value: 'child' })];
         }
 
         class ChildNoDecorators extends Parent {}
 
         // Check that metadata for Parent was not changed!
-        expect(reflector.annotations(Parent)).toEqual([new ClassDecorator({value: 'parent'})]);
+        expect(reflector.annotations(Parent)).toEqual([new ClassDecorator({ value: 'parent' })]);
 
         expect(reflector.annotations(Child)).toEqual([
-          new ClassDecorator({value: 'parent'}), new ClassDecorator({value: 'child'})
+          new ClassDecorator({ value: 'parent' }),
+          new ClassDecorator({ value: 'child' }),
         ]);
 
-        expect(reflector.annotations(ChildNoDecorators)).toEqual([new ClassDecorator(
-            {value: 'parent'})]);
+        expect(reflector.annotations(ChildNoDecorators)).toEqual([new ClassDecorator({ value: 'parent' })]);
       });
 
       it('should inherit parameters', () => {
@@ -515,9 +511,7 @@ class TestObj {
         class Child extends Parent {}
 
         class ChildWithCtor extends Parent {
-          static parameters = [
-            [C, new ParamDecorator('c')],
-          ];
+          static parameters = [[C, new ParamDecorator('c')]];
           constructor() {
             super();
           }
@@ -525,11 +519,13 @@ class TestObj {
 
         // Check that metadata for Parent was not changed!
         expect(reflector.parameters(Parent)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(Child)).toEqual([
-          [A, new ParamDecorator('a')], [B, new ParamDecorator('b')]
+          [A, new ParamDecorator('a')],
+          [B, new ParamDecorator('b')],
         ]);
 
         expect(reflector.parameters(ChildWithCtor)).toEqual([[C, new ParamDecorator('c')]]);
@@ -542,28 +538,28 @@ class TestObj {
 
         class Parent {
           static propMetadata: any = {
-            'a': [new PropDecorator('a')],
-            'b': [new PropDecorator('b1')],
+            a: [new PropDecorator('a')],
+            b: [new PropDecorator('b1')],
           };
         }
 
         class Child extends Parent {
           static propMetadata: any = {
-            'b': [new PropDecorator('b2')],
-            'c': [new PropDecorator('c')],
+            b: [new PropDecorator('b2')],
+            c: [new PropDecorator('c')],
           };
         }
 
         // Check that metadata for Parent was not changed!
         expect(reflector.propMetadata(Parent)).toEqual({
-          'a': [new PropDecorator('a')],
-          'b': [new PropDecorator('b1')],
+          a: [new PropDecorator('a')],
+          b: [new PropDecorator('b1')],
         });
 
         expect(reflector.propMetadata(Child)).toEqual({
-          'a': [new PropDecorator('a')],
-          'b': [new PropDecorator('b1'), new PropDecorator('b2')],
-          'c': [new PropDecorator('c')]
+          a: [new PropDecorator('a')],
+          b: [new PropDecorator('b1'), new PropDecorator('b2')],
+          c: [new PropDecorator('c')],
         });
       });
     });
