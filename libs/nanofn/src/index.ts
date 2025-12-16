@@ -11,6 +11,7 @@ export { omit } from './obj/omit';
 export { pick } from './obj/pick';
 export { filterObj } from './obj/filter-obj';
 export { partitionObj } from './obj/partition-obj';
+export { reject } from './obj/reject';
 
 export {
   isPresent,
