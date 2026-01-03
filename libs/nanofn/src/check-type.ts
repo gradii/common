@@ -5,7 +5,7 @@
  */
 
 export function isPresent(value: null | undefined): false;
-export function isPresent(value: any): boolean;
+export function isPresent<T>(value: T): value is NonNullable<T>;
 export function isPresent(value: any): boolean {
   return value !== null && value !== undefined;
 }
