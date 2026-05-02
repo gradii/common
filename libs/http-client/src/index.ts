@@ -1,11 +1,12 @@
 export * from './lib/backend';
 export * from './lib/backends';
 export * from './lib/client';
-export { HttpConfig, setupConfig } from './lib/config';
 export * from './lib/context';
+export * from './lib/errors';
 export * from './lib/headers';
 export * from './lib/interceptor';
 export * from './lib/params';
+export * from './lib/provider';
 export * from './lib/request';
 export * from './lib/response';
 export * from './lib/xsrf';

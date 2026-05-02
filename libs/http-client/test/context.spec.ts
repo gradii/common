@@ -3,13 +3,15 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
-import { HttpContext, HttpContextToken } from '../src/context';
+import { HttpContext, HttpContextToken } from '../src/lib/context';
 
-const IS_ENABLED = new HttpContextToken<boolean>(() => false);
-const CACHE_OPTION = new HttpContextToken<{ cache: boolean, expiresIn?: number }>(() => ({ cache: false }));
+const IS_ENABLED   = new HttpContextToken<boolean>(() => false);
+const CACHE_OPTION = new HttpContextToken<{ cache: boolean; expiresIn?: number }>(() => ({
+  cache: false,
+}));
 
 describe('HttpContext', () => {
   let context: HttpContext;
@@ -21,9 +23,7 @@ describe('HttpContext', () => {
   describe('with basic value', () => {
     it('should test public api', () => {
       expect(context.get(IS_ENABLED)).toBe(false);
-      expect([...context.keys()]).toEqual([
-        IS_ENABLED
-      ]);  // value from factory function is stored in the map upon access
+      expect([...context.keys()]).toEqual([IS_ENABLED]); // value from factory function is stored in the map upon access
 
       context.set(IS_ENABLED, true);
       expect(context.get(IS_ENABLED)).toBe(true);
@@ -49,7 +49,7 @@ describe('HttpContext', () => {
     });
 
     it('should ensure that same reference is returned for default value between multiple accesses', () => {
-      const value = context.get(CACHE_OPTION);  // will get default value
+      const value = context.get(CACHE_OPTION); // will get default value
       expect(value).toEqual({ cache: false });
       expect(context.get(CACHE_OPTION)).toBe(value);
     });

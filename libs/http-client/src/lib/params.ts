@@ -1,7 +1,19 @@
 /**
+ * @license
+ * Copyright Google LLC All Rights Reserved.
+ *
+ * Use of this source code is governed by an MIT-style license that can be
+ * found in the LICENSE file at https://angular.dev/license
+ */
+
+import { HttpRuntimeError, RuntimeErrorCode } from './errors';
+
+/**
  * A codec for encoding and decoding parameters in URLs.
  *
  * Used by `HttpParams`.
+ *
+ * @see [Custom parameter encoding](guide/http/making-requests#custom-parameter-encoding)
  *
  * @publicApi
  **/
@@ -97,13 +109,13 @@ const STANDARD_ENCODING_REPLACEMENTS: { [x: string]: string } = {
   '3B': ';',
   '3D': '=',
   '3F': '?',
-  '2F': '/'
+  '2F': '/',
 };
 
 function standardEncoding(v: string): string {
   return encodeURIComponent(v).replace(
     STANDARD_ENCODING_REGEX,
-    (s, t) => STANDARD_ENCODING_REPLACEMENTS[t] ?? s
+    (s, t) => STANDARD_ENCODING_REPLACEMENTS[t] ?? s,
   );
 }
 
@@ -119,6 +131,9 @@ interface Update {
 
 /**
  * Options used to construct an `HttpParams` instance.
+ *
+ * @see [Setting URL parameters](guide/http/making-requests#setting-url-parameters)
+ * @see [Custom parameter encoding](guide/http/making-requests#custom-parameter-encoding)
  *
  * @publicApi
  */
@@ -144,6 +159,8 @@ export interface HttpParamsOptions {
  *
  * This class is immutable; all mutation operations return a new instance.
  *
+ * @see [Setting URL parameters](guide/http/making-requests#setting-url-parameters)
+ *
  * @publicApi
  */
 export class HttpParams {
@@ -154,15 +171,18 @@ export class HttpParams {
 
   constructor(options: HttpParamsOptions = {} as HttpParamsOptions) {
     this.encoder = options.encoder || new HttpUrlEncodingCodec();
-    if (!!options.fromString) {
-      if (!!options.fromObject) {
-        throw new Error(`Cannot specify both fromString and fromObject.`);
+    if (options.fromString) {
+      if (options.fromObject) {
+        throw new HttpRuntimeError(
+          RuntimeErrorCode.CANNOT_SPECIFY_BOTH_FROM_STRING_AND_FROM_OBJECT,
+          'Cannot specify both fromString and fromObject.',
+        );
       }
       this.map = paramParser(options.fromString, this.encoder);
     } else if (!!options.fromObject) {
       this.map = new Map<string, string[]>();
       Object.keys(options.fromObject).forEach((key) => {
-        const value  = (options.fromObject as any)[key];
+        const value = (options.fromObject as any)[key];
         // convert the values to strings
         const values = Array.isArray(value) ? value.map(valueToString) : [valueToString(value)];
         this.map!.set(key, values);
@@ -316,8 +336,8 @@ export class HttpParams {
             break;
           case 'd':
             if (update.value !== undefined) {
-              const base = this.map!.get(update.param) || [];
-              const idx  = base.indexOf(valueToString(update.value));
+              let base = this.map!.get(update.param) || [];
+              const idx = base.indexOf(valueToString(update.value));
               if (idx !== -1) {
                 base.splice(idx, 1);
               }

@@ -3,23 +3,23 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
-import { HttpHeaders } from '../src/headers';
-import { HttpResponse, HttpStatusCode } from '../src/response';
+import { HttpHeaders } from '../src/lib/headers';
+import { HttpResponse, HttpStatusCode } from '../src/lib/response';
 
 describe('HttpResponse', () => {
   describe('constructor()', () => {
     it('fully constructs responses', () => {
       const resp = new HttpResponse({
-        body: 'test body',
-        headers: new HttpHeaders({
-          'Test': 'Test header',
+        body      : 'test body',
+        headers   : new HttpHeaders({
+          Test: 'Test header',
         }),
-        status: HttpStatusCode.Created,
+        status    : HttpStatusCode.Created,
         statusText: 'Created',
-        url: '/test',
+        url       : '/test',
       });
       expect(resp.body).toBe('test body');
       expect(resp.headers instanceof HttpHeaders).toBeTruthy();
@@ -43,10 +43,10 @@ describe('HttpResponse', () => {
     });
   });
   it('.ok is determined by status', () => {
-    const good = new HttpResponse({ status: 200 });
+    const good     = new HttpResponse({ status: 200 });
     const alsoGood = new HttpResponse({ status: 299 });
-    const badHigh = new HttpResponse({ status: 300 });
-    const badLow = new HttpResponse({ status: 199 });
+    const badHigh  = new HttpResponse({ status: 300 });
+    const badLow   = new HttpResponse({ status: 199 });
     expect(good.ok).toBe(true);
     expect(alsoGood.ok).toBe(true);
     expect(badHigh.ok).toBe(false);
@@ -55,10 +55,10 @@ describe('HttpResponse', () => {
   describe('.clone()', () => {
     it('copies the original when given no arguments', () => {
       const clone = new HttpResponse({
-        body: 'test',
-        status: HttpStatusCode.Created,
+        body      : 'test',
+        status    : HttpStatusCode.Created,
         statusText: 'created',
-        url: '/test'
+        url       : '/test',
       }).clone();
       expect(clone.body).toBe('test');
       expect(clone.status).toBe(HttpStatusCode.Created);
@@ -67,17 +67,17 @@ describe('HttpResponse', () => {
       expect(clone.headers).not.toBeNull();
     });
     it('overrides the original', () => {
-      const orig = new HttpResponse({
-        body: 'test',
-        status: HttpStatusCode.Created,
+      const orig  = new HttpResponse({
+        body      : 'test',
+        status    : HttpStatusCode.Created,
         statusText: 'created',
-        url: '/test'
+        url       : '/test',
       });
       const clone = orig.clone({
-        body: { data: 'test' },
-        status: HttpStatusCode.Ok,
+        body      : { data: 'test' },
+        status    : HttpStatusCode.Ok,
         statusText: 'Okay',
-        url: '/bar'
+        url       : '/bar',
       });
       expect(clone.body).toEqual({ data: 'test' });
       expect(clone.status).toBe(HttpStatusCode.Ok);

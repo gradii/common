@@ -3,14 +3,15 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
 import { Observable, Observer } from 'rxjs';
 
-import { HttpBackend } from '../backend';
+import type { HttpBackend } from '../backend';
+import { HttpRuntimeError, RuntimeErrorCode } from '../errors';
 import { HttpHeaders } from '../headers';
-import { HttpRequest } from '../request';
+import { ACCEPT_HEADER, ACCEPT_HEADER_VALUE, CONTENT_TYPE_HEADER, HttpRequest } from '../request';
 import {
   HTTP_STATUS_CODE_OK,
   HttpDownloadProgressEvent,
@@ -18,25 +19,12 @@ import {
   HttpEvent,
   HttpEventType,
   HttpHeaderResponse,
-  HttpResponse
+  HttpResponse,
 } from '../response';
 
 const XSSI_PREFIX = /^\)\]\}',?\n/;
 
-const REQUEST_URL_HEADER = `X-Request-URL`;
-
-/**
- * Determine an appropriate URL for the response, by checking either
- * response url or the X-Request-URL header.
- */
-function getResponseUrl(response: Response): string | null {
-  if (response.url) {
-    return response.url;
-  }
-  // stored as lowercase in the map
-  const xRequestUrl = REQUEST_URL_HEADER.toLocaleLowerCase();
-  return response.headers.get(xRequestUrl);
-}
+let uploadProgressWarningLogged = false;
 
 /**
  * Uses `fetch` to send requests to a backend server.
@@ -49,34 +37,62 @@ function getResponseUrl(response: Response): string | null {
  *
  * @publicApi
  */
-export class HttpFetchBackend implements HttpBackend {
-  // We need to bind the native fetch to its context or it will throw an "illegal invocation"
-  private readonly fetchImpl = fetch.bind(globalThis);
+export class FetchBackend implements HttpBackend {
+  // We use an arrow function to always reference the current global implementation of `fetch`.
+  // This is helpful for cases when the global `fetch` implementation is modified by external code,
+  // see https://github.com/angular/angular/issues/57527.
+  private readonly fetchImpl: typeof fetch;
+
+  constructor(fetchImpl?: typeof fetch | { fetch: typeof fetch }) {
+    if (fetchImpl == null) {
+      this.fetchImpl = (input, init) => globalThis.fetch(input, init);
+    } else if (typeof fetchImpl === 'function') {
+      this.fetchImpl = fetchImpl;
+    } else {
+      this.fetchImpl = fetchImpl.fetch;
+    }
+  }
 
   handle(request: HttpRequest<any>): Observable<HttpEvent<any>> {
     return new Observable((observer) => {
       const aborter = new AbortController();
+
       this.doRequest(request, aborter.signal, observer).then(noop, (error) =>
-        observer.error(new HttpErrorResponse({ error }))
+        observer.error(new HttpErrorResponse({ error })),
       );
-      return () => aborter.abort();
+
+      let timeoutId: ReturnType<typeof setTimeout> | undefined;
+      if (request.timeout) {
+        // TODO: Replace with AbortSignal.any([aborter.signal, AbortSignal.timeout(request.timeout)])
+        // when AbortSignal.any support is Baseline widely available (NET nov. 2026)
+        timeoutId = setTimeout(() => {
+          if (!aborter.signal.aborted) {
+            aborter.abort(new DOMException('signal timed out', 'TimeoutError'));
+          }
+        }, request.timeout);
+      }
+
+      return () => {
+        if (timeoutId !== undefined) {
+          clearTimeout(timeoutId);
+        }
+        aborter.abort();
+      };
     });
   }
 
   private async doRequest(
     request: HttpRequest<any>,
     signal: AbortSignal,
-    observer: Observer<HttpEvent<any>>
+    observer: Observer<HttpEvent<any>>,
   ): Promise<void> {
     const init = this.createRequestInit(request);
     let response;
-
     try {
       const fetchPromise = this.fetchImpl(request.urlWithParams, { signal, ...init });
 
-      // Make sure Zone.js doesn't trigger false-positive unhandled promise
-      // error in case the Promise is rejected synchronously. See function
-      // description for additional information.
+      // Make sure unhandled promise rejection warnings are silenced if the Promise
+      // is rejected synchronously. See function description for additional information.
       silenceSuperfluousUnhandledPromiseRejection(fetchPromise);
 
       // Send the `Sent` event before awaiting the response.
@@ -90,20 +106,21 @@ export class HttpFetchBackend implements HttpBackend {
           status    : error.status ?? 0,
           statusText: error.statusText,
           url       : request.urlWithParams,
-          headers   : error.headers
-        })
+          headers   : error.headers,
+        }),
       );
       return;
     }
 
     const headers    = new HttpHeaders(response.headers);
     const statusText = response.statusText;
-    const url        = getResponseUrl(response) ?? request.urlWithParams;
+    const url        = response.url || request.urlWithParams;
 
     let status                                            = response.status;
     let body: string | ArrayBuffer | Blob | object | null = null;
 
-    if (request.reportProgress) {
+    const reportDownloadProgress = request.reportProgress || request.reportDownloadProgress;
+    if (reportDownloadProgress) {
       observer.next(new HttpHeaderResponse({ headers, status, statusText, url }));
     }
 
@@ -117,9 +134,7 @@ export class HttpFetchBackend implements HttpBackend {
       let decoder: TextDecoder;
       let partialText: string | undefined;
 
-      // Perform response processing outside of Angular zone to
-      // ensure no excessive change detection runs are executed
-      // Here calling the async ReadableStreamDefaultReader.read() is responsible for triggering CD
+      // Here calling the async ReadableStreamDefaultReader.read() drives chunked reads.
       while (true) {
         const { done, value } = await reader.read();
 
@@ -130,29 +145,27 @@ export class HttpFetchBackend implements HttpBackend {
         chunks.push(value);
         receivedLength += value.length;
 
-        if (request.reportProgress) {
+        if (reportDownloadProgress) {
           partialText =
             request.responseType === 'text'
               ? (partialText ?? '') +
-              (decoder ??= new TextDecoder()).decode(value, { stream: true })
+                (decoder ??= new TextDecoder()).decode(value, { stream: true })
               : undefined;
 
-          const reportProgress = () =>
-            observer.next({
-              type  : HttpEventType.DownloadProgress,
-              total : contentLength ? +contentLength : undefined,
-              loaded: receivedLength,
-              partialText
-            } as HttpDownloadProgressEvent);
-          reportProgress();
+          observer.next({
+            type   : HttpEventType.DownloadProgress,
+            total  : contentLength ? +contentLength : undefined,
+            loaded : receivedLength,
+            partialText,
+          } as HttpDownloadProgressEvent);
         }
       }
 
       // Combine all chunks.
       const chunksAll = this.concatChunks(chunks, receivedLength);
       try {
-        const contentType = response.headers.get('Content-Type') ?? '';
-        body              = this.parseBody(request, chunksAll, contentType);
+        const contentType = response.headers.get(CONTENT_TYPE_HEADER) ?? '';
+        body              = this.parseBody(request, chunksAll, contentType, status);
       } catch (error) {
         // Body loading or parsing failed
         observer.error(
@@ -161,8 +174,8 @@ export class HttpFetchBackend implements HttpBackend {
             headers   : new HttpHeaders(response.headers),
             status    : response.status,
             statusText: response.statusText,
-            url       : getResponseUrl(response) ?? request.urlWithParams
-          })
+            url       : response.url || request.urlWithParams,
+          }),
         );
         return;
       }
@@ -179,6 +192,10 @@ export class HttpFetchBackend implements HttpBackend {
     // asked for JSON data and the body cannot be parsed as such.
     const ok = status >= 200 && status < 300;
 
+    const redirected = response.redirected;
+
+    const responseType = response.type;
+
     if (ok) {
       observer.next(
         new HttpResponse({
@@ -186,8 +203,10 @@ export class HttpFetchBackend implements HttpBackend {
           headers,
           status,
           statusText,
-          url
-        })
+          url,
+          redirected,
+          responseType,
+        }),
       );
 
       // The full body has been received and delivered, no further events
@@ -200,8 +219,10 @@ export class HttpFetchBackend implements HttpBackend {
           headers,
           status,
           statusText,
-          url
-        })
+          url,
+          redirected,
+          responseType,
+        }),
       );
     }
   }
@@ -209,50 +230,90 @@ export class HttpFetchBackend implements HttpBackend {
   private parseBody(
     request: HttpRequest<any>,
     binContent: Uint8Array,
-    contentType: string
+    contentType: string,
+    status: number,
   ): string | ArrayBuffer | Blob | object | null {
     switch (request.responseType) {
       case 'json':
         // stripping the XSSI when present
         const text = new TextDecoder().decode(binContent).replace(XSSI_PREFIX, '');
-        return text === '' ? null : (JSON.parse(text) as object);
+        if (text === '') {
+          return null;
+        }
+        try {
+          return JSON.parse(text) as object;
+        } catch (e: unknown) {
+          // Allow handling non-JSON errors (!) as plain text, same as the XHR
+          // backend. Without this special sauce, any non-JSON error would be
+          // completely inaccessible downstream as the `HttpErrorResponse.error`
+          // would be set to the `SyntaxError` from then failing `JSON.parse`.
+          if (status < 200 || status >= 300) {
+            return text;
+          }
+          throw e;
+        }
       case 'text':
         return new TextDecoder().decode(binContent);
       case 'blob':
-        return new Blob([binContent], { type: contentType });
+        return new Blob([binContent as BlobPart], { type: contentType });
       case 'arraybuffer':
-        return binContent.buffer;
+        return binContent.buffer as ArrayBuffer;
     }
   }
 
   private createRequestInit(req: HttpRequest<any>): RequestInit {
-    // We could share some of this logic with the XhrBackend
+    if (req.reportUploadProgress) {
+      throw new HttpRuntimeError(
+        RuntimeErrorCode.FETCH_UPLOAD_PROGRESS_NOT_SUPPORTED,
+        'The FetchBackend does not support upload progress reporting. Please use `HttpXhrBackend` if you want to report upload progress.',
+      );
+    }
 
-    const headers: Record<string, string>             = {};
-    const credentials: RequestCredentials | undefined = req.withCredentials ? 'include' : undefined;
+    // We could share some of this logic with the XhrBackend
+    const headers: Record<string, string> = {};
+    let credentials: RequestCredentials | undefined;
+
+    // If the request has a credentials property, use it.
+    // Otherwise, if the request has withCredentials set to true, use 'include'.
+    credentials = req.credentials;
+
+    // If withCredentials is true should be set to 'include', for compatibility
+    if (req.withCredentials) {
+      // A warning is logged if the request has both
+      warningOptionsMessage(req);
+      credentials = 'include';
+    }
 
     // Setting all the requested headers.
     req.headers.forEach((name, values) => (headers[name] = values.join(',')));
 
     // Add an Accept header if one isn't present already.
-    if (!req.headers.has('Accept')) {
-      headers['Accept'] = 'application/json, text/plain, */*';
+    if (!req.headers.has(ACCEPT_HEADER)) {
+      headers[ACCEPT_HEADER] = ACCEPT_HEADER_VALUE;
     }
 
     // Auto-detect the Content-Type header if one isn't present already.
-    if (!req.headers.has('Content-Type')) {
+    if (!req.headers.has(CONTENT_TYPE_HEADER)) {
       const detectedType = req.detectContentTypeHeader();
       // Sometimes Content-Type detection fails.
       if (detectedType !== null) {
-        headers['Content-Type'] = detectedType;
+        headers[CONTENT_TYPE_HEADER] = detectedType;
       }
     }
 
     return {
-      body  : req.serializeBody(),
-      method: req.method,
+      body          : req.serializeBody(),
+      method        : req.method,
       headers,
-      credentials
+      credentials,
+      keepalive     : req.keepalive,
+      cache         : req.cache,
+      priority      : req.priority,
+      mode          : req.mode,
+      redirect      : req.redirect,
+      referrer      : req.referrer,
+      integrity     : req.integrity,
+      referrerPolicy: req.referrerPolicy,
     };
   }
 
@@ -268,14 +329,26 @@ export class HttpFetchBackend implements HttpBackend {
   }
 }
 
-function noop(): void {
+/**
+ * Abstract class to provide a mocked implementation of `fetch()`
+ */
+export abstract class FetchFactory {
+  abstract fetch: typeof fetch;
+}
+
+function noop(): void {}
+
+function warningOptionsMessage(req: HttpRequest<any>) {
+  if (req.credentials && req.withCredentials) {
+    console.warn(
+      `NG0${RuntimeErrorCode.WITH_CREDENTIALS_OVERRIDES_EXPLICIT_CREDENTIALS}: A \`HttpClient\` request has both \`withCredentials: true\` and \`credentials: '${req.credentials}'\` options. The \`withCredentials\` option is overriding the explicit \`credentials\` setting to 'include'. Consider removing \`withCredentials\` and using \`credentials: '${req.credentials}'\` directly for clarity.`,
+    );
+  }
 }
 
 /**
- * Zone.js treats a rejected promise that has not yet been awaited
- * as an unhandled error. This function adds a noop `.then` to make
- * sure that Zone.js doesn't throw an error if the Promise is rejected
- * synchronously.
+ * Adds a noop `.then` to a Promise to suppress unhandled-rejection warnings if it rejects
+ * synchronously before the await on it has a chance to attach a handler.
  */
 function silenceSuperfluousUnhandledPromiseRejection(promise: Promise<unknown>) {
   promise.then(noop, noop);

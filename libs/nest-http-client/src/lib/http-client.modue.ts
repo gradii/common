@@ -3,17 +3,37 @@
  * Copyright Google LLC All Rights Reserved.
  *
  * Use of this source code is governed by an MIT-style license that can be
- * found in the LICENSE file at https://angular.io/license
+ * found in the LICENSE file at https://angular.dev/license
  */
 
 import {
-  HttpBackend, HttpClient, HttpEvent, HttpFetchBackend, HttpHandler, HttpInterceptor, HttpInterceptorHandler, HttpRequest,
-  HttpXhrBackend, HttpXsrfCookieExtractor, HttpXsrfInterceptor, HttpXsrfTokenExtractor
+  CookieSource,
+  createXsrfInterceptor,
+  FetchBackend,
+  HttpBackend,
+  HttpClient,
+  HttpHandler,
+  HttpInterceptor,
+  HttpInterceptorFn,
+  HttpInterceptorHandler,
+  HttpRequest,
+  HttpEvent,
+  HttpXhrBackend,
+  HttpXsrfCookieExtractor,
+  HttpXsrfTokenExtractor,
+  XSRF_DEFAULT_COOKIE_NAME,
+  XSRF_DEFAULT_HEADER_NAME,
+  legacyInterceptorFnFactory,
 } from '@gradii/http-client';
 import { DynamicModule, Inject, Injectable, Module, Optional } from '@nestjs/common';
-// import { ModuleRef } from '@nestjs/core';
 import { Observable } from 'rxjs';
-import { HTTP_INTERCEPTORS, NoopInterceptor, XSRF_COOKIE_NAME, XSRF_HEADER_NAME } from './token';
+import {
+  HTTP_INTERCEPTORS,
+  NoopInterceptor,
+  XSRF_COOKIE_NAME,
+  XSRF_HEADER_NAME,
+  XSRF_COOKIE_SOURCE,
+} from './token';
 
 /**
  * An injectable `HttpHandler` that applies multiple interceptors
@@ -28,18 +48,20 @@ import { HTTP_INTERCEPTORS, NoopInterceptor, XSRF_COOKIE_NAME, XSRF_HEADER_NAME 
 export class HttpInterceptingHandler implements HttpHandler {
   private chain: HttpHandler | null = null;
 
-  constructor(private backend: HttpBackend,
-              @Inject(HTTP_INTERCEPTORS)
-              @Optional()
-              private interceptors: any[] = []) {
-  }
+  constructor(
+    private backend: HttpBackend,
+    @Inject(HTTP_INTERCEPTORS)
+    @Optional()
+    private interceptors: HttpInterceptor[] = [],
+  ) {}
 
   handle(req: HttpRequest<any>): Observable<HttpEvent<any>> {
     if (this.chain === null) {
       const interceptors = this.interceptors || [];
-      this.chain         = interceptors.reduceRight(
-        (next: HttpInterceptorHandler, interceptor: HttpInterceptor) => new HttpInterceptorHandler(next, interceptor),
-        this.backend);
+      // Wrap legacy class-based interceptors into a single functional interceptor and feed that
+      // chain to the new `HttpInterceptorHandler`.
+      const legacyFn: HttpInterceptorFn = legacyInterceptorFnFactory(interceptors);
+      this.chain                        = new HttpInterceptorHandler(this.backend, [legacyFn]);
     }
     return this.chain.handle(req);
   }
@@ -50,16 +72,15 @@ export class HttpInterceptingHandler implements HttpHandler {
  * to a request before passing it to the given `HttpBackend`.
  *
  * Use as a factory function within `HttpClientModule`.
- *
- *
  */
 export function interceptingHandler(
-  backend: HttpBackend, interceptors: HttpInterceptor[] | null = []): HttpHandler {
-  if (!interceptors) {
+  backend: HttpBackend,
+  interceptors: HttpInterceptor[] | null = [],
+): HttpHandler {
+  if (!interceptors || interceptors.length === 0) {
     return backend;
   }
-  return interceptors.reduceRight(
-    (next, interceptor) => new HttpInterceptorHandler(next, interceptor), backend);
+  return new HttpInterceptorHandler(backend, [legacyInterceptorFnFactory(interceptors)]);
 }
 
 /**
@@ -67,8 +88,6 @@ export function interceptingHandler(
  *
  * Ordinarily JSONP callbacks are stored on the `window` object, but this may not exist
  * in test environments. In that case, callbacks are stored on an anonymous object instead.
- *
- *
  */
 // eslint-disable-next-line @typescript-eslint/ban-types
 export function jsonpCallbackContext(): Object {
@@ -76,6 +95,27 @@ export function jsonpCallbackContext(): Object {
     return window;
   }
   return {};
+}
+
+/**
+ * Class-based wrapper around the functional `createXsrfInterceptor`.
+ *
+ * Kept as a class so that it can be registered as a `HTTP_INTERCEPTORS` provider in NestJS
+ * modules.
+ */
+@Injectable()
+export class HttpXsrfInterceptor implements HttpInterceptor {
+  private readonly fn: HttpInterceptorFn;
+
+  constructor(tokenService: HttpXsrfTokenExtractor, headerName: string) {
+    this.fn = createXsrfInterceptor({ tokenExtractor: tokenService, headerName });
+  }
+
+  intercept(req: HttpRequest<any>, next: HttpHandler): Observable<HttpEvent<any>> {
+    return this.fn(req, (downstreamRequest) => next.handle(downstreamRequest)) as Observable<
+      HttpEvent<any>
+    >;
+  }
 }
 
 /**
@@ -94,41 +134,40 @@ export function jsonpCallbackContext(): Object {
   providers: [
     {
       provide   : HttpXsrfInterceptor,
-      useFactory: (tokenService, headerName) => new HttpXsrfInterceptor(tokenService, headerName),
-      inject    : [
-        HttpXsrfTokenExtractor,
-        XSRF_HEADER_NAME
-      ]
+      useFactory: (tokenService: HttpXsrfTokenExtractor, headerName: string) =>
+        new HttpXsrfInterceptor(tokenService, headerName),
+      inject    : [HttpXsrfTokenExtractor, XSRF_HEADER_NAME],
     },
     {
       provide   : HTTP_INTERCEPTORS,
-      useFactory: (clz, interceptors = []) => [
+      useFactory: (clz: HttpInterceptor, interceptors: HttpInterceptor[] = []) => [
         clz,
-        ...interceptors
+        ...interceptors,
       ],
-      inject    : [
-        HttpXsrfInterceptor,
-        {token: HTTP_INTERCEPTORS, optional: true},
-      ]
+      inject    : [HttpXsrfInterceptor, { token: HTTP_INTERCEPTORS, optional: true }],
     },
     {
-      provide: HttpXsrfCookieExtractor, useFactory: () => new HttpXsrfCookieExtractor(null, 'server', null)
+      provide   : HttpXsrfCookieExtractor,
+      useFactory: (source: CookieSource | null, cookieName: string) =>
+        new HttpXsrfCookieExtractor(source ?? { cookie: '' }, cookieName),
+      inject    : [
+        { token: XSRF_COOKIE_SOURCE, optional: true },
+        XSRF_COOKIE_NAME,
+      ],
     },
-    {provide: HttpXsrfTokenExtractor, useClass: HttpXsrfCookieExtractor},
-    {provide: XSRF_COOKIE_NAME, useValue: 'XSRF-TOKEN'},
-    {provide: XSRF_HEADER_NAME, useValue: 'X-XSRF-TOKEN'},
+    { provide: HttpXsrfTokenExtractor, useExisting: HttpXsrfCookieExtractor },
+    { provide: XSRF_COOKIE_NAME, useValue: XSRF_DEFAULT_COOKIE_NAME },
+    { provide: XSRF_HEADER_NAME, useValue: XSRF_DEFAULT_HEADER_NAME },
   ],
 })
 export class HttpClientXsrfModule {
   /**
    * Disable the default XSRF protection.
    */
-  static disable(): DynamicModule/*<HttpClientXsrfModule>*/ {
+  static disable(): DynamicModule {
     return {
       module   : HttpClientXsrfModule,
-      providers: [
-        {provide: HttpXsrfInterceptor, useClass: NoopInterceptor},
-      ],
+      providers: [{ provide: HttpXsrfInterceptor, useClass: NoopInterceptor }],
     };
   }
 
@@ -138,18 +177,19 @@ export class HttpClientXsrfModule {
    * cookie name or header name.
    * - Cookie name default is `XSRF-TOKEN`.
    * - Header name default is `X-XSRF-TOKEN`.
-   *
    */
-  static withOptions(options: {
-    cookieName?: string,
-    headerName?: string,
-  } = {}): DynamicModule/*<HttpClientXsrfModule>*/ {
+  static withOptions(
+    options: {
+      cookieName?: string;
+      headerName?: string;
+    } = {},
+  ): DynamicModule {
     return {
       module   : HttpClientXsrfModule,
       providers: [
-        options.cookieName ? {provide: XSRF_COOKIE_NAME, useValue: options.cookieName} : null,
-        options.headerName ? {provide: XSRF_HEADER_NAME, useValue: options.headerName} : null,
-      ].filter(it => !!it),
+        options.cookieName ? { provide: XSRF_COOKIE_NAME, useValue: options.cookieName } : null,
+        options.headerName ? { provide: XSRF_HEADER_NAME, useValue: options.headerName } : null,
+      ].filter((it): it is { provide: any; useValue: string } => !!it),
     };
   }
 }
@@ -169,8 +209,8 @@ export class HttpClientXsrfModule {
    */
   imports: [
     HttpClientXsrfModule.withOptions({
-      cookieName: 'XSRF-TOKEN',
-      headerName: 'X-XSRF-TOKEN',
+      cookieName: XSRF_DEFAULT_COOKIE_NAME,
+      headerName: XSRF_DEFAULT_HEADER_NAME,
     }),
   ],
   /**
@@ -180,41 +220,14 @@ export class HttpClientXsrfModule {
   providers: [
     {
       provide   : HttpClient,
-      useFactory: (interceptors = [], httpBackend) => new HttpClient(interceptors, httpBackend),
-      inject    : [
-        {token: HTTP_INTERCEPTORS, optional: true},
-        HttpBackend
-      ]
+      useFactory: (handler: HttpHandler) => new HttpClient(handler),
+      inject    : [HttpHandler],
     },
-    {provide: HttpHandler, useClass: HttpInterceptingHandler},
-    {provide: HttpXhrBackend, useExisting: HttpFetchBackend},
-    HttpFetchBackend,
-    {provide: HttpBackend, useExisting: HttpFetchBackend},
+    { provide: HttpHandler, useClass: HttpInterceptingHandler },
+    FetchBackend,
+    { provide: HttpXhrBackend, useExisting: FetchBackend },
+    { provide: HttpBackend, useExisting: FetchBackend },
   ],
-  exports: [
-    HttpClient
-  ]
+  exports  : [HttpClient],
 })
-export class HttpClientModule {
-}
-
-// /**
-//  * Configures the [dependency injector](guide/glossary#injector) for `HttpClient`
-//  * with supporting services for JSONP.
-//  * Without this module, Jsonp requests reach the backend
-//  * with method JSONP, where they are rejected.
-//  *
-//  * You can add interceptors to the chain behind `HttpClient` by binding them to the
-//  * multiprovider for built-in [DI token](guide/glossary#di-token) `HTTP_INTERCEPTORS`.
-//  *
-//  * @publicApi
-//  */
-// @NgModule({
-//   providers: [
-//     JsonpClientBackend,
-//     {provide: JsonpCallbackContext, useFactory: jsonpCallbackContext},
-//     {provide: HTTP_INTERCEPTORS, useClass: JsonpInterceptor, multi: true},
-//   ],
-// })
-// export class HttpClientJsonpModule {
-// }
+export class HttpClientModule {}
