@@ -4,12 +4,12 @@
  * Use of this source code is governed by an MIT-style license
  */
 
-import { Matrix2 } from '../src/matrix2';
-import { Matrix3 } from '../src/matrix3';
-import { Matrix4 } from '../src/matrix4';
-import { Vector2 } from '../src/vector2';
-import { Vector3 } from '../src/vector3';
-import { Vector4 } from '../src/vector4';
+import { Matrix2 } from '../src/lib/matrix2';
+import { Matrix3 } from '../src/lib/matrix3';
+import { Matrix4 } from '../src/lib/matrix4';
+import { Vector2 } from '../src/lib/vector2';
+import { Vector3 } from '../src/lib/vector3';
+import { Vector4 } from '../src/lib/vector4';
 import { absoluteError, relativeError } from './error-helpers';
 
 export function $v2(x: number, y: number) {

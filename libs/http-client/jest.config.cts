@@ -1,5 +1,4 @@
-/* eslint-disable */
-export default {
+module.exports = {
   displayName: 'annotation',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
@@ -7,5 +6,5 @@ export default {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/libs/annotation',
+  coverageDirectory: '../../coverage/apps/annotation',
 };

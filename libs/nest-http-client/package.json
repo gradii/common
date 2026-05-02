@@ -1,6 +1,9 @@
 {
   "name": "@gradii/nest-http-client",
   "version": "0.2.2",
+  "type": "commonjs",
+  "main": "./src/index.js",
+  "types": "./src/index.d.ts",
   "dependencies": {
     "@gradii/http-client": "^0.2.2"
   }

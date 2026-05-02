@@ -1,11 +1,10 @@
-/* eslint-disable */
-export default {
-  displayName: 'vector-math',
+module.exports = {
+  displayName: 'nest-http-client',
   preset: '../../jest.preset.js',
   testEnvironment: 'node',
   transform: {
     '^.+\\.[tj]s$': ['ts-jest', { tsconfig: '<rootDir>/tsconfig.spec.json' }],
   },
   moduleFileExtensions: ['ts', 'js', 'html'],
-  coverageDirectory: '../../coverage/libs/vector-math',
+  coverageDirectory: '../../coverage/libs/nest-http-client',
 };
