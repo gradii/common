@@ -121,6 +121,32 @@ importers:
         specifier: 6.5.2
         version: 6.5.2(typanion@3.14.0)
 
+  libs/annotation:
+    dependencies:
+      tslib:
+        specifier: ^2.3.0
+        version: 2.8.1
+
+  libs/http-client: {}
+
+  libs/nanofn:
+    dependencies:
+      tslib:
+        specifier: ^2.3.0
+        version: 2.8.1
+
+  libs/nest-http-client:
+    dependencies:
+      '@gradii/http-client':
+        specifier: workspace:^
+        version: link:../http-client
+
+  libs/vector-math:
+    dependencies:
+      tslib:
+        specifier: ^2.3.0
+        version: 2.8.1
+
 packages:
 
   '@angular-devkit/core@19.2.24':

@@ -4,7 +4,7 @@
   "type": "commonjs",
   "main": "./src/index.js",
   "types": "./src/index.d.ts",
-  "dependencies": {
-    "@gradii/http-client": "^1.0.0"
+  "peerDependencies": {
+    "@gradii/http-client": "workspace:^"
   }
 }
