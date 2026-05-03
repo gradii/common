@@ -6,7 +6,7 @@
 
 import { Matrix2 } from '../src/lib/matrix2';
 import { Vector2 } from '../src/lib/vector2';
-import { parseMatrix, parseVector, relativeTest } from './test-utils';
+import { parseMatrix, parseVector, relativeTest } from './test-utils.spec';
 
 describe('matrix2', () => {
   it('adjoint', () => {

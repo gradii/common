@@ -6,7 +6,7 @@
 
 import '../helpers/custom-matchers';
 
-import { Vector4 } from '../../src/vector4';
+import { Vector4 } from '../../src/lib/vector4';
 
 describe('Vector4', () => {
   let out: Vector4;

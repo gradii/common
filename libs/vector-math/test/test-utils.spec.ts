@@ -12,6 +12,12 @@ import { Vector3 } from '../src/lib/vector3';
 import { Vector4 } from '../src/lib/vector4';
 import { absoluteError, relativeError } from './error-helpers';
 
+describe('empty', ()=>{
+  it('empty', ()=>{
+    expect(true).toBe(true);
+  })
+})
+
 export function $v2(x: number, y: number) {
   return new Vector2(x, y);
 }

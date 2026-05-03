@@ -8,7 +8,7 @@
 /*
 * common.js unit test
 */
-import { EPSILON, equals, toRadian } from '../../src/common';
+import { EPSILON, equals, toRadian } from '../../src/lib/common';
 
 describe('matrix', () => {
   describe('toRadian', () => {
