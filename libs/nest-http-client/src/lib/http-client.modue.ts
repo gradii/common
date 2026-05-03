@@ -148,16 +148,23 @@ export class HttpXsrfInterceptor implements HttpInterceptor {
     },
     {
       provide   : HttpXsrfCookieExtractor,
-      useFactory: (source: CookieSource | null, cookieName: string) =>
-        new HttpXsrfCookieExtractor(source ?? { cookie: '' }, cookieName),
-      inject    : [
-        { token: XSRF_COOKIE_SOURCE, optional: true },
-        XSRF_COOKIE_NAME,
-      ],
+      useFactory: (source: CookieSource, cookieName: string) =>
+        new HttpXsrfCookieExtractor(source, cookieName),
+      inject    : [XSRF_COOKIE_SOURCE, XSRF_COOKIE_NAME],
     },
     { provide: HttpXsrfTokenExtractor, useExisting: HttpXsrfCookieExtractor },
     { provide: XSRF_COOKIE_NAME, useValue: XSRF_DEFAULT_COOKIE_NAME },
     { provide: XSRF_HEADER_NAME, useValue: XSRF_DEFAULT_HEADER_NAME },
+    { provide: XSRF_COOKIE_SOURCE, useValue: { cookie: '' } as CookieSource },
+  ],
+  exports  : [
+    HttpXsrfInterceptor,
+    HttpXsrfTokenExtractor,
+    HttpXsrfCookieExtractor,
+    HTTP_INTERCEPTORS,
+    XSRF_COOKIE_NAME,
+    XSRF_HEADER_NAME,
+    XSRF_COOKIE_SOURCE,
   ],
 })
 export class HttpClientXsrfModule {

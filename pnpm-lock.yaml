@@ -138,7 +138,7 @@ importers:
   libs/nest-http-client:
     dependencies:
       '@gradii/http-client':
-        specifier: workspace:^
+        specifier: workspace:*
         version: link:../http-client
 
   libs/vector-math:
